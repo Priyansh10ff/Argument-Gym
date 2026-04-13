@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import Anthropic from '@anthropic-ai/sdk';
+import OpenAI from 'openai';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { existsSync } from 'fs';
@@ -23,7 +23,11 @@ if (isProd) {
   if (existsSync(publicPath)) app.use(express.static(publicPath));
 }
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const client = new OpenAI({
+  baseURL: process.env.PRIMARY_LLM_BASE_URL || 'https://openrouter.ai/api/v1',
+  apiKey: process.env.PRIMARY_LLM_API_KEY,
+});
+const MODEL = process.env.PRIMARY_LLM_MODEL || 'qwen/qwen3-plus:free';
 
 const SYSTEM_PROMPT = `You are the Argument Gym AI — a sharp, intellectually rigorous sparring partner. Your job is NOT to be helpful or agreeable. Your job is to make the user's thinking stronger by challenging it relentlessly.
 
@@ -55,13 +59,15 @@ app.post('/api/extract-claims', async (req, res) => {
   const { statement, topic, stance, difficulty } = req.body;
   if (!statement || !topic) return res.status(400).json({ error: 'Missing fields' });
   try {
-    const msg = await client.messages.create({
-      model: 'claude-sonnet-4-5',
+    const msg = await client.chat.completions.create({
+      model: MODEL,
       max_tokens: 512,
-      system: SYSTEM_PROMPT,
-      messages: [{ role: 'user', content: `ACTION: EXTRACT_CLAIMS\nTopic: ${topic}\nStance: ${stance}\nDifficulty: ${difficulty}\nStatement: ${statement}` }]
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user', content: `ACTION: EXTRACT_CLAIMS\nTopic: ${topic}\nStance: ${stance}\nDifficulty: ${difficulty}\nStatement: ${statement}` }
+      ]
     });
-    const text = msg.content[0].text;
+    const text = msg.choices[0].message.content;
     const match = text.match(/\|\|\|CLAIMS\|\|\|([\s\S]*?)\|\|\|END\|\|\|/);
     if (!match) return res.status(500).json({ error: 'Model format error' });
     res.json(JSON.parse(match[1]));
@@ -76,8 +82,12 @@ app.post('/api/argue', async (req, res) => {
   if (!messages || !topic) return res.status(400).json({ error: 'Missing fields' });
   const sys = SYSTEM_PROMPT + `\n\nDEBATE: ${topic} | Stance: ${stance} | Difficulty: ${difficulty}\nChallenging claims:\n${(claims||[]).map((c,i)=>`${i+1}. ${c}`).join('\n')}`;
   try {
-    const msg = await client.messages.create({ model: 'claude-sonnet-4-5', max_tokens: 600, system: sys, messages });
-    const text = msg.content[0].text;
+    const msg = await client.chat.completions.create({
+      model: MODEL,
+      max_tokens: 600,
+      messages: [{ role: 'system', content: sys }, ...messages]
+    });
+    const text = msg.choices[0].message.content;
     const scoreMatch = text.match(/\|\|\|SCORES\|\|\|([\s\S]*?)\|\|\|END\|\|\|/);
     const argumentText = text.replace(/\|\|\|SCORES\|\|\|[\s\S]*?\|\|\|END\|\|\|/, '').trim();
     let scores = { logic: 7, evidence: 6, originality: 7, roundFeedback: '' };
@@ -93,11 +103,12 @@ app.post('/api/verdict', async (req, res) => {
   const { messages, topic, stance, difficulty, claims, sideSwitch } = req.body;
   const sys = SYSTEM_PROMPT + `\n\nDEBATE: ${topic} | Stance: ${stance} | Difficulty: ${difficulty} | Side switch: ${sideSwitch}\nClaims:\n${(claims||[]).map((c,i)=>`${i+1}. ${c}`).join('\n')}`;
   try {
-    const msg = await client.messages.create({
-      model: 'claude-sonnet-4-5', max_tokens: 900, system: sys,
-      messages: [...messages, { role: 'user', content: 'ACTION: FINAL_VERDICT' }]
+    const msg = await client.chat.completions.create({
+      model: MODEL,
+      max_tokens: 900,
+      messages: [{ role: 'system', content: sys }, ...messages, { role: 'user', content: 'ACTION: FINAL_VERDICT' }]
     });
-    const text = msg.content[0].text;
+    const text = msg.choices[0].message.content;
     const match = text.match(/\|\|\|VERDICT\|\|\|([\s\S]*?)\|\|\|END\|\|\|/);
     if (!match) return res.status(500).json({ error: 'Model format error' });
     res.json(JSON.parse(match[1]));
