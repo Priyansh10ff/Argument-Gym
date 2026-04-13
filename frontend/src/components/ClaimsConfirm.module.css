@@ -1,0 +1,17 @@
+.wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem 1rem; }
+.inner { width: 100%; max-width: 640px; animation: fadeUp 0.4s ease both; }
+.badge { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.15em; color: var(--yellow); border: 1px solid #5a4a10; display: inline-block; padding: 4px 12px; margin-bottom: 1.5rem; }
+.title { font-family: var(--font-display); font-size: 48px; letter-spacing: 0.04em; margin-bottom: 0.5rem; }
+.sub { font-size: 14px; color: var(--text-dim); margin-bottom: 1.75rem; font-weight: 300; }
+.claims { display: flex; flex-direction: column; gap: 10px; margin-bottom: 1.5rem; }
+.claim { display: flex; gap: 16px; align-items: flex-start; background: var(--gray); border: 1px solid var(--gray-light); padding: 1rem; animation: slideIn 0.35s ease both; }
+.num { font-family: var(--font-display); font-size: 28px; color: var(--red); line-height: 1; flex-shrink: 0; margin-top: -2px; }
+.claimText { font-size: 14px; line-height: 1.6; color: var(--white); font-weight: 300; margin: 0; }
+.summary { background: #111; border-left: 3px solid var(--red); padding: 1rem 1.25rem; margin-bottom: 1.5rem; }
+.summaryLabel { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; color: var(--text-dim); display: block; margin-bottom: 6px; }
+.summaryText { font-size: 14px; color: var(--text-dim); font-style: italic; margin: 0; line-height: 1.6; }
+.warning { display: flex; gap: 10px; align-items: flex-start; border: 1px solid #3a2a00; background: #1a1500; padding: 1rem; margin-bottom: 1.5rem; font-size: 13px; color: var(--yellow); line-height: 1.5; }
+.warningIcon { font-family: var(--font-mono); font-weight: 500; flex-shrink: 0; }
+.btn { width: 100%; background: var(--red); color: var(--white); padding: 14px; font-family: var(--font-display); font-size: 20px; letter-spacing: 0.06em; transition: background 0.15s; }
+.btn:hover:not(:disabled) { background: #c4241a; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }

@@ -1,0 +1,85 @@
+.wrap { min-height: 100vh; display: flex; align-items: flex-start; justify-content: center; padding: 2rem 1rem; }
+.inner { width: 100%; max-width: 700px; animation: fadeUp 0.5s ease both; display: flex; flex-direction: column; gap: 1.5rem; }
+
+.verdictBanner {
+  border: 2px solid;
+  padding: 1.5rem 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+.verdictLabel { font-family: var(--font-display); font-size: 48px; letter-spacing: 0.06em; line-height: 1; }
+.clarityScore { font-family: var(--font-display); font-size: 72px; color: var(--white); line-height: 1; margin-left: auto; }
+.clarityLabel { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.15em; color: var(--text-dim); align-self: flex-end; margin-bottom: 8px; }
+
+.ringRow { display: flex; gap: 1.5rem; flex-wrap: wrap; justify-content: center; }
+.ring { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.ringLabel { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.12em; color: var(--text-dim); }
+
+.feedback {
+  background: var(--gray);
+  border-left: 3px solid var(--red);
+  padding: 1.25rem 1.5rem;
+}
+.feedbackLabel { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.15em; color: var(--text-dim); margin-bottom: 8px; }
+.feedbackText { font-size: 15px; color: var(--white); font-style: italic; margin: 0; line-height: 1.7; font-weight: 300; }
+
+.sectionLabel { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.15em; color: var(--text-dim); margin-bottom: 10px; }
+
+.claimsGrid { display: flex; flex-direction: column; gap: 8px; }
+
+.claimResult {
+  padding: 1rem;
+  border: 1px solid;
+}
+.survived { border-color: #1a3a1a; background: #0a1a0a; }
+.fell { border-color: #3a1a1a; background: #110a0a; }
+
+.claimResultHeader { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.claimResultIcon { font-family: var(--font-mono); font-size: 12px; font-weight: 500; }
+.survived .claimResultIcon { color: #4CAF50; }
+.fell .claimResultIcon { color: var(--red); }
+.claimResultStatus { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.12em; }
+.survived .claimResultStatus { color: #4CAF50; }
+.fell .claimResultStatus { color: var(--red); }
+.claimResultText { font-size: 13px; color: var(--white); margin: 0 0 4px; font-weight: 300; }
+.claimResultNote { font-size: 12px; color: var(--text-dim); margin: 0; font-style: italic; }
+
+.swGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.swCard { background: var(--gray); border: 1px solid var(--gray-light); padding: 1rem; }
+.swTitle { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.15em; color: var(--text-dim); margin-bottom: 12px; }
+.swItem { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 8px; font-size: 13px; line-height: 1.5; font-weight: 300; }
+.swIcon { font-family: var(--font-mono); font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+.strength { color: var(--white); }
+.strength .swIcon { color: #4CAF50; }
+.weakness { color: var(--text-dim); }
+.weakness .swIcon { color: var(--red); }
+
+.actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
+.shareBtn {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--gray-light);
+  color: var(--text-dim);
+  padding: 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  transition: all 0.15s;
+  min-width: 160px;
+}
+.shareBtn:hover { border-color: var(--white); color: var(--white); }
+
+.resetBtn {
+  flex: 2;
+  background: var(--red);
+  color: var(--white);
+  padding: 14px 24px;
+  font-family: var(--font-display);
+  font-size: 22px;
+  letter-spacing: 0.06em;
+  transition: background 0.15s;
+}
+.resetBtn:hover { background: #c4241a; }

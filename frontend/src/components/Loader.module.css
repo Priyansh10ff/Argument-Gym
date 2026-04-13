@@ -1,0 +1,25 @@
+.wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+.inner { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; }
+.bars { display: flex; align-items: flex-end; gap: 5px; height: 48px; }
+.bar {
+  width: 8px;
+  background: var(--red);
+  border-radius: 2px;
+  animation: barPulse 0.8s ease-in-out infinite alternate;
+}
+@keyframes barPulse {
+  from { height: 16px; opacity: 0.4; }
+  to { height: 48px; opacity: 1; }
+}
+.msg {
+  font-family: var(--font-display);
+  font-size: 28px;
+  letter-spacing: 0.06em;
+  color: var(--white);
+}
+.sub {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+}
