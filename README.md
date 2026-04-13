@@ -1,8 +1,10 @@
-# Argument Gym
+# 🥊 Argument Gym
+
+> **Train your mind. Defend your stance. Survive the verdict.**
 
 AI debate sparring app that challenges your stance, highlights weak reasoning, and returns a scored verdict.
 
-## What It Does
+## 🎯 What It Does
 
 1. Pick a topic and stance (`for` or `against`)
 2. Pick difficulty (`casual`, `rigorous`, `brutal`)
@@ -12,7 +14,7 @@ AI debate sparring app that challenges your stance, highlights weak reasoning, a
 6. Optional side-switch after round 3+ to argue the opposite position
 7. Receive a final verdict with score breakdown across logic, evidence, originality, and clarity
 
-## Tech Stack
+## 🛠 Tech Stack
 
 | Layer | Technology |
 |---|---|
@@ -22,12 +24,12 @@ AI debate sparring app that challenges your stance, highlights weak reasoning, a
 
 The backend uses the `openai` npm package and connects to any OpenAI-compatible endpoint via `PRIMARY_LLM_BASE_URL`. It defaults to OpenRouter, but can point to OpenAI, Groq, or a local inference server by changing two environment variables.
 
-## Prerequisites
+## ✅ Prerequisites
 
 - Node.js 18+
 - An API key for an OpenAI-compatible provider (free tier available at [openrouter.ai](https://openrouter.ai/keys))
 
-## Quick Start (Development)
+## ⚡ Quick Start (Development)
 
 **1. Install all dependencies**
 
@@ -66,12 +68,12 @@ NODE_ENV=development
 npm run dev
 ```
 
-- Frontend: `http://localhost:5173`
-- Backend API: `http://localhost:3001`
+- 🌐 Frontend: `http://localhost:5173`
+- 🔌 Backend API: `http://localhost:3001`
 
 The Vite dev server proxies all `/api/*` requests to the backend automatically.
 
-## Available Scripts
+## 📜 Available Scripts
 
 Run from the repo root:
 
@@ -84,7 +86,7 @@ Run from the repo root:
 | `npm run start:backend` | Starts backend only |
 | `npm run start:frontend` | Starts frontend Vite dev server only |
 
-## API Reference
+## 📡 API Reference
 
 Base URL in development: proxied from Vite `/api` → `http://localhost:3001`
 
@@ -166,7 +168,7 @@ Generates the final verdict after all rounds complete.
 }
 ```
 
-## Production Deployment
+## 🚀 Production Deployment
 
 In production, the backend serves the built frontend as static files from `backend/public`. There is no separate frontend server.
 
@@ -213,7 +215,7 @@ npm start
 
 App is available at `http://localhost:3001` (or your configured `PORT`).
 
-## Docker
+## 🐳 Docker
 
 A multi-stage `Dockerfile` is included. The builder stage compiles the frontend; the production stage bundles it with the backend.
 
@@ -228,18 +230,18 @@ docker run -p 3001:3001 \
   argument-gym
 ```
 
-## Using a Different LLM Provider
+## 🔁 Using a Different LLM Provider
 
 The backend accepts any OpenAI-compatible endpoint. Set `PRIMARY_LLM_BASE_URL` and `PRIMARY_LLM_MODEL` to switch providers without changing code.
 
 | Provider | `PRIMARY_LLM_BASE_URL` | Example model |
 |---|---|---|
-| OpenRouter (default) | `https://openrouter.ai/api/v1` | `qwen/qwen3-plus:free` |
-| OpenAI | `https://api.openai.com/v1` | `gpt-4o-mini` |
-| Groq | `https://api.groq.com/openai/v1` | `llama-3.3-70b-versatile` |
-| Local (Ollama) | `http://localhost:11434/v1` | `llama3.2` |
+| ⚡ OpenRouter (default) | `https://openrouter.ai/api/v1` | `qwen/qwen3-plus:free` |
+| 🤖 OpenAI | `https://api.openai.com/v1` | `gpt-4o-mini` |
+| 🦙 Groq | `https://api.groq.com/openai/v1` | `llama-3.3-70b-versatile` |
+| 🏠 Local (Ollama) | `http://localhost:11434/v1` | `llama3.2` |
 
-## Environment Variables
+## 🔐 Environment Variables
 
 All variables are read by `backend/.env` (or system environment in production/Docker).
 
@@ -252,7 +254,7 @@ All variables are read by `backend/.env` (or system environment in production/Do
 | `FRONTEND_URL` | No | `http://localhost:5173` | Allowed CORS origin (ignored in production) |
 | `NODE_ENV` | No | `development` | Set to `production` to enable static file serving |
 
-## Project Structure
+## 📁 Project Structure
 
 ```
 argument-gym/
@@ -274,7 +276,7 @@ argument-gym/
 └── package.json           # Root scripts using concurrently
 ```
 
-## Scoring
+## 🏆 Scoring
 
 **Per-round scores** (0–10, returned by `/api/argue`, evaluated on the user's argument):
 - `logic` — soundness of reasoning
@@ -288,7 +290,7 @@ The frontend converts running round averages to a 0–100 display scale.
 - `logic`, `evidence`, `originality`, `perspective` — overall debate performance
 - `clarityScore` — how clearly the user communicated throughout
 
-## Troubleshooting
+## 🩹 Troubleshooting
 
 **`Model format error` or empty response**  
 The model failed to return the expected `|||CLAIMS|||`, `|||SCORES|||`, or `|||VERDICT|||` delimiters. Some smaller or heavily filtered models are inconsistent — try switching to a more capable model via `PRIMARY_LLM_MODEL`.
