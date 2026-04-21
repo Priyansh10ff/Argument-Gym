@@ -26,3 +26,5 @@ pnpm-debug.log*
 Thumbs.db
 .idea/
 .vscode/
+backend/data.sqlite
+.env

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useGym, PHASES } from './hooks/useGym';
 import Landing from './components/Landing';
 import Statement from './components/Statement';
@@ -7,17 +7,50 @@ import Sparring from './components/Sparring';
 import SideSwitchOffer from './components/SideSwitchOffer';
 import Verdict from './components/Verdict';
 import Loader from './components/Loader';
+import HvHLobby from './components/HvHLobby';
+import HvHSparring from './components/HvHSparring';
 
 export default function App() {
   const gym = useGym();
+  // HvH state lives outside useGym (different flow entirely)
+  const [hvhMode, setHvhMode] = useState(false);
+  const [hvhRoom, setHvhRoom] = useState(null); // { roomId, userId, name }
 
-  const handleStart = ({ topic, stance, difficulty }) => {
+  const handleStart = ({ topic, stance, difficulty, mode }) => {
+    // Human vs Human — route to lobby instead
+    if (mode === 'hvh') {
+      setHvhMode(true);
+      return;
+    }
+    gym.setMode(mode || 'standard');
     gym.setTopic(topic);
     gym.setStance(stance);
     gym.setDifficulty(difficulty);
     gym.startDebate(topic);
   };
 
+  // ── HvH flow ──
+  if (hvhMode && !hvhRoom) {
+    return (
+      <HvHLobby
+        onEnterRoom={(roomData) => setHvhRoom(roomData)}
+        onBack={() => setHvhMode(false)}
+      />
+    );
+  }
+
+  if (hvhMode && hvhRoom) {
+    return (
+      <HvHSparring
+        roomId={hvhRoom.roomId}
+        userId={hvhRoom.userId}
+        name={hvhRoom.name}
+        onBack={() => { setHvhMode(false); setHvhRoom(null); }}
+      />
+    );
+  }
+
+  // ── Single-player flow ──
   switch (gym.phase) {
     case PHASES.LANDING:
       return <Landing onStart={handleStart} />;
@@ -58,6 +91,8 @@ export default function App() {
           stance={gym.stance}
           difficulty={gym.difficulty}
           claims={gym.claims}
+          claimsHp={gym.claimsHp}
+          MAX_CLAIM_HP={gym.MAX_CLAIM_HP}
           rounds={gym.rounds}
           currentRound={gym.currentRound}
           userInput={gym.userInput}
@@ -69,6 +104,7 @@ export default function App() {
           onSubmit={gym.submitRound}
           onEndEarly={gym.endEarly}
           sideSwitch={gym.sideSwitch}
+          mode={gym.mode}
         />
       );
 
@@ -93,6 +129,8 @@ export default function App() {
           stance={gym.stance}
           sideSwitch={gym.sideSwitch}
           onReset={gym.reset}
+          eloResult={gym.eloResult}
+          mode={gym.mode}
         />
       );
 
