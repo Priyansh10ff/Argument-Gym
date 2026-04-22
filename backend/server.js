@@ -163,22 +163,36 @@ app.post('/api/verdict', async (req, res) => {
 
 // ── HvH REST ──
 app.post('/api/hvh/create', (req, res) => {
-  const { userId, name, topic } = req.body;
+  const { userId, name, topic, minPlayers } = req.body;
   if (!userId || !topic) return res.status(400).json({ error: 'Missing fields' });
+  const min = Math.max(2, Math.floor((Number(minPlayers) || 2) / 2) * 2); // even, ≥ 2
   const roomId = uuidv4().slice(0, 8).toUpperCase();
   rooms.set(roomId, {
-    topic, status: 'waiting',
+    topic, status: 'waiting', minPlayers: min,
     players: [{ id: userId, name: name || 'Player 1', socketId: null, stance: 'for' }],
     messages: [], roundScores: [], createdAt: Date.now()
   });
-  res.json({ roomId });
+  res.json({ roomId, minPlayers: min });
+});
+
+app.get('/api/hvh/rooms', (_req, res) => {
+  const list = [];
+  for (const [id, room] of rooms) {
+    if (room.status === 'finished') continue;
+    list.push({
+      roomId: id, topic: room.topic, status: room.status,
+      playerCount: room.players.length, minPlayers: room.minPlayers,
+      createdAt: room.createdAt
+    });
+  }
+  res.json(list.sort((a, b) => b.createdAt - a.createdAt));
 });
 
 app.get('/api/hvh/room/:roomId', (req, res) => {
   const room = rooms.get(req.params.roomId.toUpperCase());
   if (!room) return res.status(404).json({ error: 'Room not found' });
   res.json({
-    topic: room.topic, status: room.status,
+    topic: room.topic, status: room.status, minPlayers: room.minPlayers,
     playerCount: room.players.length,
     players: room.players.map(p => ({ name: p.name, stance: p.stance }))
   });
@@ -190,31 +204,50 @@ io.on('connection', (socket) => {
     const rid = roomId.toUpperCase();
     const room = rooms.get(rid);
     if (!room) { socket.emit('hvh:error', { message: 'Room not found' }); return; }
-    if (room.players.length >= 2 && !room.players.find(p => p.id === userId)) {
+
+    const existing = room.players.find(p => p.id === userId);
+    if (!existing && room.status !== 'waiting') {
+      socket.emit('hvh:error', { message: 'Game already in progress' }); return;
+    }
+    if (!existing && room.players.length >= room.minPlayers) {
       socket.emit('hvh:error', { message: 'Room is full' }); return;
     }
 
     socket.join(rid);
-    const existing = room.players.find(p => p.id === userId);
     if (existing) {
       existing.socketId = socket.id;
-    } else if (room.players.length < 2) {
-      room.players.push({ id: userId, name: name || 'Player 2', socketId: socket.id, stance: 'against' });
+    } else {
+      const stance = room.players.length % 2 === 0 ? 'for' : 'against';
+      room.players.push({ id: userId, name: name || `Player ${room.players.length + 1}`, socketId: socket.id, stance });
     }
     socket.data = { roomId: rid, userId };
 
-    if (room.players.length === 2 && room.status === 'waiting') {
+    const playerList = room.players.map(p => ({ id: p.id, name: p.name, stance: p.stance }));
+
+    if (room.players.length >= room.minPlayers && room.status === 'waiting') {
       room.status = 'active';
-      io.to(rid).emit('hvh:start', {
-        topic: room.topic,
-        players: room.players.map(p => ({ id: p.id, name: p.name, stance: p.stance }))
-      });
+      io.to(rid).emit('hvh:start', { topic: room.topic, players: playerList, minPlayers: room.minPlayers });
     } else {
-      socket.emit('hvh:joined', {
+      io.to(rid).emit('hvh:player_update', {
         topic: room.topic, status: room.status,
-        players: room.players.map(p => ({ id: p.id, name: p.name, stance: p.stance }))
+        players: playerList, playerCount: room.players.length, minPlayers: room.minPlayers
       });
     }
+  });
+
+  socket.on('hvh:start_early', ({ roomId, userId }) => {
+    const rid = (roomId || '').toUpperCase();
+    const room = rooms.get(rid);
+    if (!room || room.status !== 'waiting') return;
+    if (room.players[0]?.id !== userId) {
+      socket.emit('hvh:error', { message: 'Only the room creator can start early' }); return;
+    }
+    if (room.players.length < 2 || room.players.length % 2 !== 0) {
+      socket.emit('hvh:error', { message: 'Need an even number of players (min 2) to start' }); return;
+    }
+    room.status = 'active';
+    const playerList = room.players.map(p => ({ id: p.id, name: p.name, stance: p.stance }));
+    io.to(rid).emit('hvh:start', { topic: room.topic, players: playerList, minPlayers: room.minPlayers });
   });
 
   socket.on('hvh:message', async ({ roomId, userId, text }) => {

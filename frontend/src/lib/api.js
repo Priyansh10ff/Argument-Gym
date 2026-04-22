@@ -30,3 +30,4 @@ export const getLeaderboard = () => get('/leaderboard');
 // HvH
 export const createHvHRoom = (body) => post('/hvh/create', body);
 export const getHvHRoom = (roomId) => get(`/hvh/room/${roomId}`);
+export const getHvHRooms = () => get('/hvh/rooms');

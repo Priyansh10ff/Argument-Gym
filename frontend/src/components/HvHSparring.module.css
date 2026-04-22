@@ -123,6 +123,28 @@
 .waitDots { display: flex; justify-content: center; gap: 6px; margin-bottom: 2rem; }
 .waitDots span { width: 6px; height: 6px; background: var(--red); animation: blink 1.2s infinite; }
 
+.playerCount { display: flex; align-items: baseline; justify-content: center; gap: 4px; margin-bottom: 1rem; }
+.playerCountNum { font-family: var(--font-display); font-size: 3rem; color: #4CAF50; line-height: 1; }
+.playerCountSep { font-family: var(--font-display); font-size: 2rem; color: var(--text-dim); }
+.playerCountMin { font-family: var(--font-display); font-size: 3rem; color: var(--text-dim); line-height: 1; }
+.playerCountLabel { font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); letter-spacing: 0.1em; margin-left: 8px; }
+
+.playerList { display: flex; flex-direction: column; gap: 6px; margin-bottom: 1.5rem; min-width: 240px; text-align: left; }
+.playerItem { display: flex; align-items: center; gap: 10px; background: var(--gray); border: 1px solid var(--gray-light); padding: 6px 12px; }
+.playerStance { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em; padding: 2px 6px; }
+.stanceFor     { background: #0a1a0a; color: #4CAF50; border: 1px solid #1a3a1a; }
+.stanceAgainst { background: #1a0a0a; color: var(--red); border: 1px solid #3a1a1a; }
+.playerItemName { font-size: 13px; color: var(--white); font-weight: 300; }
+
+.startNowBtn {
+  display: block; width: 100%; max-width: 320px; margin: 0 auto 1.5rem;
+  background: #4CAF50; color: var(--black);
+  padding: 12px 20px; font-family: var(--font-display);
+  font-size: 18px; letter-spacing: 0.06em;
+  border: none; cursor: pointer; transition: background 0.15s;
+}
+.startNowBtn:hover { background: #5cbf60; }
+
 /* ── Verdict screen ──────────────────────────────────────────────────────── */
 .verdictWrap { min-height: 100vh; display: flex; align-items: flex-start; justify-content: center; padding: 2rem 1rem; position: relative; }
 .verdictInner { width: 100%; max-width: 680px; position: relative; z-index: 1; animation: fadeUp 0.5s ease both; display: flex; flex-direction: column; gap: 1.5rem; }

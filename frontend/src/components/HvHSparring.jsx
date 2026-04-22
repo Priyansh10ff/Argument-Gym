@@ -7,6 +7,7 @@ export default function HvHSparring({ roomId, userId, name, onBack }) {
   const [status, setStatus]         = useState('connecting');
   const [topic, setTopic]           = useState('');
   const [players, setPlayers]       = useState([]);
+  const [minPlayers, setMinPlayers] = useState(2);
   const [messages, setMessages]     = useState([]);
   const [analyses, setAnalyses]     = useState([]);
   const [finalVerdict, setVerdict]  = useState(null);
@@ -18,19 +19,19 @@ export default function HvHSparring({ roomId, userId, name, onBack }) {
   const myId = userId || getUserId();
 
   useEffect(() => {
-    // Connect to same origin — Vite proxies /socket.io in dev
     const sock = io({ transports: ['websocket', 'polling'] });
     socketRef.current = sock;
 
     sock.on('connect', () => sock.emit('hvh:join', { roomId, userId: myId, name }));
 
-    sock.on('hvh:joined', ({ topic, status, players }) => {
+    sock.on('hvh:player_update', ({ topic, status, players, minPlayers }) => {
       setTopic(topic);
       setPlayers(players);
+      setMinPlayers(minPlayers);
       setStatus(status === 'active' ? 'active' : 'waiting');
     });
-    sock.on('hvh:start', ({ topic, players }) => {
-      setTopic(topic); setPlayers(players); setStatus('active');
+    sock.on('hvh:start', ({ topic, players, minPlayers }) => {
+      setTopic(topic); setPlayers(players); setMinPlayers(minPlayers); setStatus('active');
     });
     sock.on('hvh:message',     msg => setMessages(p => [...p, msg]));
     sock.on('hvh:ai_analysis', a   => setAnalyses(p  => [...p, a]));
@@ -44,6 +45,11 @@ export default function HvHSparring({ roomId, userId, name, onBack }) {
 
     return () => sock.disconnect();
   }, [roomId]);
+
+  const startEarly = () => {
+    if (!socketRef.current) return;
+    socketRef.current.emit('hvh:start_early', { roomId, userId: myId });
+  };
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -111,18 +117,45 @@ export default function HvHSparring({ roomId, userId, name, onBack }) {
 
   // ── Waiting / Connecting ──
   if (status === 'connecting' || status === 'waiting') {
+    const isCreator   = players[0]?.id === myId;
+    const canStartNow = isCreator && players.length >= 2 && players.length % 2 === 0;
     return (
       <div className={styles.waitWrap}>
         <div className={styles.noise} />
         <div className={styles.waitInner}>
           <div className={styles.waitTitle}>
-            {status === 'connecting' ? 'CONNECTING…' : 'WAITING FOR OPPONENT'}
+            {status === 'connecting' ? 'CONNECTING…' : 'WAITING FOR PLAYERS'}
           </div>
           <div className={styles.codeBox}>
             <p className={styles.codeBoxLabel}>ROOM CODE</p>
             <p className={styles.codeBoxCode}>{roomId}</p>
           </div>
           {topic && <p className={styles.waitTopic}>Topic: <strong>{topic}</strong></p>}
+          {status === 'waiting' && (
+            <div className={styles.playerCount}>
+              <span className={styles.playerCountNum}>{players.length}</span>
+              <span className={styles.playerCountSep}>/</span>
+              <span className={styles.playerCountMin}>{minPlayers}</span>
+              <span className={styles.playerCountLabel}>players joined</span>
+            </div>
+          )}
+          {status === 'waiting' && players.length > 0 && (
+            <div className={styles.playerList}>
+              {players.map((p, i) => (
+                <div key={p.id} className={styles.playerItem}>
+                  <span className={`${styles.playerStance} ${p.stance === 'for' ? styles.stanceFor : styles.stanceAgainst}`}>
+                    {p.stance === 'for' ? 'FOR' : 'AGN'}
+                  </span>
+                  <span className={styles.playerItemName}>{p.name}{p.id === myId ? ' (you)' : ''}</span>
+                </div>
+              ))}
+            </div>
+          )}
+          {canStartNow && (
+            <button className={styles.startNowBtn} onClick={startEarly}>
+              START NOW ({players.length} players) →
+            </button>
+          )}
           {error  && <p className={styles.error}>{error}</p>}
           <div className={styles.waitDots}>
             {[0,1,2].map(i => <span key={i} style={{ animationDelay:`${i*0.2}s` }} />)}
