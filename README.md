@@ -1,18 +1,40 @@
-# 🥊 Argument Gym
+# 🥊 Argument Gym v2
 
 > **Train your mind. Defend your stance. Survive the verdict.**
 
-AI debate sparring app that challenges your stance, highlights weak reasoning, and returns a scored verdict.
+AI debate sparring app with ELO rankings, claim health bars, multiple training modes, and real-time human vs human debates with AI monitoring.
 
-## 🎯 What It Does
+---
 
-1. Pick a topic and stance (`for` or `against`)
-2. Pick difficulty (`casual`, `rigorous`, `brutal`)
-3. Submit your opening statement
-4. AI extracts 3 core claims from your argument
-5. Debate up to 5 rounds against an adversarial AI
-6. Optional side-switch after round 3+ to argue the opposite position
-7. Receive a final verdict with score breakdown across logic, evidence, originality, and clarity
+## ✨ What's New in v2
+
+| Feature | Description |
+|---|---|
+| ⚔️ **Health Bar System** | Each of your 3 claims has HP. AI chips away at them each round. All 3 collapse → instant verdict |
+| 🏆 **ELO Rating + Leaderboard** | Chess-style ELO against AI difficulty tiers. Global and daily leaderboards |
+| 🎭 **Simulation Modes** | Standard Gym 🥊, Court Gym ⚖️ (legal cross-examination), Sales Gym 💼 (pitch training) |
+| 👥 **Human vs Human** | Real-time debates with a friend. AI monitors every exchange and delivers a final verdict |
+
+---
+
+## 🎯 How It Works (Single Player)
+
+1. Pick a **mode** — Standard, Court Gym, or Sales Gym
+2. Pick a **topic**, **stance**, and **difficulty**
+3. Submit your opening statement → AI extracts 3 core claims with HP
+4. Debate up to 5 rounds. AI attacks your claims and reduces their health each round
+5. Side-switch offer after round 3 to argue the opposite side
+6. Final verdict with scores, ELO delta, and claim-by-claim breakdown
+
+## 👥 How It Works (Human vs Human)
+
+1. Player 1 creates a room → gets an 8-character code
+2. Player 2 joins with the code
+3. Player 1 argues FOR, Player 2 argues AGAINST
+4. AI monitors in a live sidebar — scoring every exchange as it happens
+5. Either player requests the final verdict to end the debate
+
+---
 
 ## 🛠 Tech Stack
 
@@ -20,14 +42,19 @@ AI debate sparring app that challenges your stance, highlights weak reasoning, a
 |---|---|
 | Frontend | React 18 + Vite 5 |
 | Backend | Node.js 20, Express 4 (ES modules) |
-| LLM | OpenAI-compatible SDK → [OpenRouter](https://openrouter.ai) (default: `qwen/qwen3-plus:free`) |
+| Real-time | Socket.IO 4 |
+| Database | sql.js (SQLite in pure JS — no native build needed) |
+| LLM | OpenAI-compatible SDK → OpenRouter (default: `qwen/qwen3-plus:free`) |
 
-The backend uses the `openai` npm package and connects to any OpenAI-compatible endpoint via `PRIMARY_LLM_BASE_URL`. It defaults to OpenRouter, but can point to OpenAI, Groq, or a local inference server by changing two environment variables.
+---
 
 ## ✅ Prerequisites
 
 - Node.js 18+
-- An API key for an OpenAI-compatible provider (free tier available at [openrouter.ai](https://openrouter.ai/keys))
+- An API key for an OpenAI-compatible LLM provider
+  - Free tier: [openrouter.ai/keys](https://openrouter.ai/keys)
+
+---
 
 ## ⚡ Quick Start (Development)
 
@@ -39,19 +66,15 @@ npm run install:all
 
 **2. Create the backend env file**
 
-macOS / Linux:
 ```bash
+# macOS / Linux
 cp .env.example backend/.env
-```
 
-PowerShell:
-```powershell
+# PowerShell
 Copy-Item .env.example backend/.env
 ```
 
-**3. Fill in your API key**
-
-Edit `backend/.env`:
+**3. Fill in your API key** — edit `backend/.env`:
 
 ```env
 PRIMARY_LLM_API_KEY=your_openrouter_api_key_here
@@ -62,162 +85,44 @@ FRONTEND_URL=http://localhost:5173
 NODE_ENV=development
 ```
 
-**4. Start the dev servers**
+**4. Run**
 
 ```bash
 npm run dev
 ```
 
 - 🌐 Frontend: `http://localhost:5173`
-- 🔌 Backend API: `http://localhost:3001`
-
-The Vite dev server proxies all `/api/*` requests to the backend automatically.
-
-## 📜 Available Scripts
-
-Run from the repo root:
-
-| Script | Description |
-|---|---|
-| `npm run install:all` | Installs root, backend, and frontend dependencies |
-| `npm run dev` | Starts backend (watch mode) and frontend (Vite) concurrently |
-| `npm run build` | Builds the frontend into `frontend/dist` |
-| `npm run start` | Starts backend + Vite preview together |
-| `npm run start:backend` | Starts backend only |
-| `npm run start:frontend` | Starts frontend Vite dev server only |
-
-## 📡 API Reference
-
-Base URL in development: proxied from Vite `/api` → `http://localhost:3001`
-
-### `POST /api/extract-claims`
-
-Parses an opening statement into 3 structured claims.
-
-**Body:**
-```json
-{
-  "statement": "string",
-  "topic": "string",
-  "stance": "for | against",
-  "difficulty": "casual | rigorous | brutal"
-}
-```
-
-**Response:**
-```json
-{
-  "claims": ["claim 1", "claim 2", "claim 3"],
-  "summary": "one sentence summary"
-}
-```
+- 🔌 Backend + Socket.IO: `http://localhost:3001`
 
 ---
-
-### `POST /api/argue`
-
-Returns the AI's counter-argument and per-round scores for the user's last message.
-
-**Body:**
-```json
-{
-  "messages": [{ "role": "user | assistant", "content": "string" }],
-  "topic": "string",
-  "stance": "for | against",
-  "difficulty": "casual | rigorous | brutal",
-  "claims": ["string"]
-}
-```
-
-**Response:**
-```json
-{
-  "argument": "string",
-  "scores": {
-    "logic": 0,
-    "evidence": 0,
-    "originality": 0,
-    "roundFeedback": "string"
-  }
-}
-```
-
----
-
-### `POST /api/verdict`
-
-Generates the final verdict after all rounds complete.
-
-**Body:** Same as `/api/argue`, plus `"sideSwitch": boolean`
-
-**Response:**
-```json
-{
-  "claimResults": [{ "claim": "string", "survived": true, "note": "string" }],
-  "overallFeedback": "string",
-  "strengths": ["string"],
-  "weaknesses": ["string"],
-  "scores": {
-    "logic": 0,
-    "evidence": 0,
-    "originality": 0,
-    "perspective": 0
-  },
-  "clarityScore": 0,
-  "verdict": "Won | Lost | Draw"
-}
-```
 
 ## 🚀 Production Deployment
 
-In production, the backend serves the built frontend as static files from `backend/public`. There is no separate frontend server.
-
-**1. Build the frontend**
-
 ```bash
+# 1. Build frontend
 npm run build
-```
 
-**2. Copy the build into the backend**
+# 2. Copy build into backend (macOS/Linux)
+rm -rf backend/public && cp -r frontend/dist backend/public
 
-macOS / Linux:
-```bash
-rm -rf backend/public
-cp -r frontend/dist backend/public
-```
-
-PowerShell:
-```powershell
+# PowerShell
 Remove-Item -Recurse -Force backend/public -ErrorAction SilentlyContinue
 Copy-Item -Recurse frontend/dist backend/public
-```
 
-**3. Configure the backend env**
-
-Create `backend/.env` (or set environment variables on your host):
-
-```env
-PRIMARY_LLM_API_KEY=your_openrouter_api_key_here
-PRIMARY_LLM_BASE_URL=https://openrouter.ai/api/v1
-PRIMARY_LLM_MODEL=qwen/qwen3-plus:free
-PORT=3001
+# 3. Set env vars on your host (or create backend/.env)
+PRIMARY_LLM_API_KEY=...
 NODE_ENV=production
+PORT=3001
+
+# 4. Start
+cd backend && npm start
 ```
 
-`FRONTEND_URL` is not required in production — CORS is set to `*` when `NODE_ENV=production`.
+App runs at `http://localhost:3001`. The database file `backend/data.sqlite` is created automatically on first run and persists ELO/leaderboard data.
 
-**4. Start the server**
-
-```bash
-cd backend
-npm start
-```
-
-App is available at `http://localhost:3001` (or your configured `PORT`).
+---
 
 ## 🐳 Docker
-
-A multi-stage `Dockerfile` is included. The builder stage compiles the frontend; the production stage bundles it with the backend.
 
 ```bash
 docker build -t argument-gym .
@@ -227,12 +132,15 @@ docker run -p 3001:3001 \
   -e PRIMARY_LLM_BASE_URL=https://openrouter.ai/api/v1 \
   -e PRIMARY_LLM_MODEL=qwen/qwen3-plus:free \
   -e NODE_ENV=production \
+  -v $(pwd)/data:/app/data \
   argument-gym
 ```
 
-## 🔁 Using a Different LLM Provider
+> Mount a volume to `-v $(pwd)/data:/app` if you want the SQLite database to persist across container restarts.
 
-The backend accepts any OpenAI-compatible endpoint. Set `PRIMARY_LLM_BASE_URL` and `PRIMARY_LLM_MODEL` to switch providers without changing code.
+---
+
+## 🔁 Using a Different LLM Provider
 
 | Provider | `PRIMARY_LLM_BASE_URL` | Example model |
 |---|---|---|
@@ -241,68 +149,152 @@ The backend accepts any OpenAI-compatible endpoint. Set `PRIMARY_LLM_BASE_URL` a
 | 🦙 Groq | `https://api.groq.com/openai/v1` | `llama-3.3-70b-versatile` |
 | 🏠 Local (Ollama) | `http://localhost:11434/v1` | `llama3.2` |
 
-## 🔐 Environment Variables
+> **Note:** Health bars and HvH monitoring require the model to reliably return structured delimiter tokens (`|||CLAIM_HITS|||`, `|||HVH_SCORES|||`). Larger models (gpt-4o-mini, llama-3.3-70b) are more consistent than small free models.
 
-All variables are read by `backend/.env` (or system environment in production/Docker).
+---
+
+## 📜 Available Scripts
+
+| Script | Description |
+|---|---|
+| `npm run install:all` | Installs root, backend, and frontend dependencies |
+| `npm run dev` | Starts backend + frontend concurrently (dev mode) |
+| `npm run build` | Builds frontend into `frontend/dist` |
+| `npm run start` | Starts backend + Vite preview |
+| `npm run start:backend` | Starts backend only |
+
+---
+
+## 📡 API Reference
+
+### Single-Player
+
+| Method | Path | Description |
+|---|---|---|
+| `POST` | `/api/extract-claims` | Parse opening statement into 3 claims |
+| `POST` | `/api/argue` | Get AI counter-argument + scores + claim hits |
+| `POST` | `/api/verdict` | Final verdict after all rounds |
+
+### ELO / Leaderboard
+
+| Method | Path | Description |
+|---|---|---|
+| `POST` | `/api/user/init` | Create or fetch user by UUID |
+| `GET` | `/api/user/:id` | Get user stats + history |
+| `POST` | `/api/elo/update` | Update ELO after a verdict |
+| `GET` | `/api/leaderboard` | Global + daily leaderboard |
+
+### Human vs Human (REST)
+
+| Method | Path | Description |
+|---|---|---|
+| `POST` | `/api/hvh/create` | Create a room, get 8-char code |
+| `GET` | `/api/hvh/room/:id` | Get room info (status, players, topic) |
+
+### Human vs Human (Socket.IO events)
+
+**Client → Server:**
+
+| Event | Payload | Description |
+|---|---|---|
+| `hvh:join` | `{ roomId, userId, name }` | Join a room |
+| `hvh:message` | `{ roomId, userId, text }` | Send a debate message |
+| `hvh:verdict` | `{ roomId }` | Request final verdict |
+
+**Server → Client:**
+
+| Event | Payload | Description |
+|---|---|---|
+| `hvh:joined` | `{ topic, status, players }` | Joined successfully |
+| `hvh:start` | `{ topic, players }` | Both players present — debate begins |
+| `hvh:message` | `{ playerName, playerIndex, text, ts }` | Broadcast message |
+| `hvh:ai_analysis` | `{ round, player1, player2, roundWinner, momentum, keyInsight }` | Live AI scores |
+| `hvh:final_verdict` | `{ verdict, players }` | Final AI verdict |
+| `hvh:player_left` | `{ userId }` | Opponent disconnected |
+| `hvh:error` | `{ message }` | Error |
+
+---
+
+## 🔐 Environment Variables
 
 | Variable | Required | Default | Description |
 |---|---|---|---|
 | `PRIMARY_LLM_API_KEY` | **Yes** | — | API key for your LLM provider |
-| `PRIMARY_LLM_BASE_URL` | No | `https://openrouter.ai/api/v1` | Base URL for any OpenAI-compatible API |
-| `PRIMARY_LLM_MODEL` | No | `qwen/qwen3-plus:free` | Model identifier passed to the provider |
-| `PORT` | No | `3001` | Port the Express server listens on |
-| `FRONTEND_URL` | No | `http://localhost:5173` | Allowed CORS origin (ignored in production) |
-| `NODE_ENV` | No | `development` | Set to `production` to enable static file serving |
+| `PRIMARY_LLM_BASE_URL` | No | `https://openrouter.ai/api/v1` | OpenAI-compatible base URL |
+| `PRIMARY_LLM_MODEL` | No | `qwen/qwen3-plus:free` | Model identifier |
+| `PORT` | No | `3001` | Express server port |
+| `FRONTEND_URL` | No | `http://localhost:5173` | CORS origin (dev only) |
+| `NODE_ENV` | No | `development` | Set `production` to enable static serving |
+
+---
 
 ## 📁 Project Structure
 
 ```
 argument-gym/
 ├── backend/
-│   ├── server.js          # Express API + static file serving
-│   ├── package.json
-│   └── public/            # Built frontend (copied here for production)
+│   ├── server.js        # Express + Socket.IO server
+│   ├── db.js            # sql.js SQLite — users, ELO, daily scores
+│   ├── prompts.js       # System prompts for all modes
+│   ├── data.sqlite      # Auto-created on first run (gitignored)
+│   └── package.json
 ├── frontend/
 │   ├── src/
-│   │   ├── components/    # React UI components (phases of the debate flow)
+│   │   ├── components/
+│   │   │   ├── Landing.jsx        # Mode select, ELO bar, leaderboard
+│   │   │   ├── Sparring.jsx       # Debate arena with health bars
+│   │   │   ├── HealthBar.jsx      # Claim HP component
+│   │   │   ├── Verdict.jsx        # Final verdict + ELO delta
+│   │   │   ├── HvHLobby.jsx       # Create / join HvH room
+│   │   │   └── HvHSparring.jsx    # Real-time HvH debate + AI monitor
 │   │   ├── hooks/
-│   │   │   └── useGym.js  # Central state machine for the debate flow
+│   │   │   └── useGym.js          # State machine (single-player)
 │   │   └── lib/
-│   │       └── api.js     # Typed fetch wrappers for all API endpoints
-│   ├── vite.config.js
+│   │       ├── api.js             # Fetch wrappers
+│   │       └── identity.js        # Anonymous UUID persistence
+│   ├── vite.config.js   # Proxies /api and /socket.io → backend
 │   └── package.json
 ├── .env.example
 ├── Dockerfile
-└── package.json           # Root scripts using concurrently
+└── package.json
 ```
+
+---
 
 ## 🏆 Scoring
 
-**Per-round scores** (0–10, returned by `/api/argue`, evaluated on the user's argument):
-- `logic` — soundness of reasoning
-- `evidence` — quality and specificity of supporting evidence
-- `originality` — novelty or creativity of the argument
-- `roundFeedback` — one-sentence critique of the weakest point
+**Per-round (0–10), returned by `/api/argue`:**
+- `logic` / `evidence` / `originality` — labelled differently per mode
+- `roundFeedback` — one-sentence critique
+- `claimHits` — `[bool, bool, bool]` — which claims the AI successfully undermined
 
-The frontend converts running round averages to a 0–100 display scale.
+**Final verdict (0–100), returned by `/api/verdict`:**
+- `logic`, `evidence`, `originality`, `perspective` (if side-switched), `clarityScore`
+- `claimResults` — survived / collapsed per claim
 
-**Final verdict scores** (0–100, returned by `/api/verdict`):
-- `logic`, `evidence`, `originality`, `perspective` — overall debate performance
-- `clarityScore` — how clearly the user communicated throughout
+**ELO K-factors by difficulty:**
+- `casual` → K=16 (vs AI rated 1400)
+- `rigorous` → K=24 (vs AI rated 1700)
+- `brutal` → K=32 (vs AI rated 2000)
+
+---
 
 ## 🩹 Troubleshooting
 
-**`Model format error` or empty response**  
-The model failed to return the expected `|||CLAIMS|||`, `|||SCORES|||`, or `|||VERDICT|||` delimiters. Some smaller or heavily filtered models are inconsistent — try switching to a more capable model via `PRIMARY_LLM_MODEL`.
+**Health bars always show full / `claimHits` always `[false,false,false]`**
+The model isn't returning the `|||CLAIM_HITS|||` delimiter reliably. Switch to a larger model. Health bars still display but won't decrement.
 
-**`Failed to process your argument`**  
-`backend/.env` is missing or `PRIMARY_LLM_API_KEY` is not set / invalid. Confirm the file exists at `backend/.env` and the key is active for the provider at `PRIMARY_LLM_BASE_URL`.
+**Leaderboard shows no entries**
+`data.sqlite` may not be created yet — play one full debate to completion to trigger ELO write.
 
-**Frontend cannot reach backend**  
-Ensure the backend is running on port `3001` and the Vite dev server is running (which handles the `/api` proxy). Verify with `curl http://localhost:3001/api/extract-claims`.
+**HvH opponent can't connect**
+Both players must use the same server. In dev, both browsers on the same machine. In production, share the deployed URL. The room code is only valid while the server is running (rooms are in-memory).
 
-**CORS errors in custom deployments**  
-In non-production mode, set `FRONTEND_URL` in `backend/.env` to your exact frontend origin (e.g. `https://app.yourdomain.com`). In production mode (`NODE_ENV=production`), CORS is open to all origins.
+**`Model format error`**
+The LLM didn't return expected delimiters. Try a more capable model via `PRIMARY_LLM_MODEL`.
 
-**`Run npm run build first` in production**  
-The backend could not find `backend/public/index.html`. Run the build and copy steps in the [Production Deployment](#production-deployment) section.
+**`Failed to process your argument`**
+`backend/.env` is missing or `PRIMARY_LLM_API_KEY` is invalid.
+
+**CORS errors in production**
+Set `NODE_ENV=production` — CORS becomes `*` and the backend serves the built frontend.

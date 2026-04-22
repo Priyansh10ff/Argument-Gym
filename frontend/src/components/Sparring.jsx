@@ -1,5 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import styles from './Sparring.module.css';
+import HealthBar from './HealthBar';
+import { SCORE_LABELS, AI_LABEL } from '../hooks/useGym';
 
 function ScoreBar({ label, value, color }) {
   return (
@@ -14,12 +16,16 @@ function ScoreBar({ label, value, color }) {
 }
 
 export default function Sparring({
-  topic, stance, difficulty, claims, rounds, currentRound,
-  userInput, setUserInput, loading, error, runningScores,
-  MAX_ROUNDS, onSubmit, onEndEarly, sideSwitch
+  topic, stance, difficulty, claims, claimsHp, MAX_CLAIM_HP,
+  rounds, currentRound, userInput, setUserInput,
+  loading, error, runningScores, MAX_ROUNDS,
+  onSubmit, onEndEarly, sideSwitch, mode
 }) {
   const bottomRef = useRef(null);
-  const inputRef = useRef(null);
+  const inputRef  = useRef(null);
+  const labels    = SCORE_LABELS[mode] || SCORE_LABELS.standard;
+  const aiLabel   = AI_LABEL[mode] || 'GYM AI';
+  const allBroken = claimsHp && claimsHp.every(hp => hp === 0);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -39,7 +45,14 @@ export default function Sparring({
           <div className={styles.topicChip}>{topic}</div>
           <div className={styles.metaRow}>
             <span className={styles.metaBadge}>{stance.toUpperCase()}</span>
-            <span className={`${styles.metaBadge} ${difficulty === 'brutal' ? styles.redBadge : ''}`}>{difficulty.toUpperCase()}</span>
+            <span className={`${styles.metaBadge} ${difficulty === 'brutal' ? styles.redBadge : ''}`}>
+              {difficulty.toUpperCase()}
+            </span>
+            {mode !== 'standard' && (
+              <span className={styles.modeBadge}>
+                {mode === 'courtroom' ? '⚖️ COURT' : '💼 SALES'}
+              </span>
+            )}
             {sideSwitch && <span className={styles.switchBadge}>SWITCHED</span>}
           </div>
           <div className={styles.roundDisplay}>
@@ -49,11 +62,22 @@ export default function Sparring({
           </div>
         </div>
 
+        {/* ── Feature 2: Health Bar ── */}
+        {claims.length > 0 && (
+          <HealthBar claims={claims} claimsHp={claimsHp} maxHp={MAX_CLAIM_HP} />
+        )}
+
+        {allBroken && (
+          <div className={styles.allBrokenAlert}>
+            ⚠ ALL CLAIMS COLLAPSED — VERDICT INCOMING
+          </div>
+        )}
+
         <div className={styles.scores}>
           <p className={styles.scoresTitle}>LIVE SCORES</p>
-          <ScoreBar label="LOGIC" value={runningScores.logic} color="#7F77DD" />
-          <ScoreBar label="EVIDENCE" value={runningScores.evidence} color="#1D9E75" />
-          <ScoreBar label="ORIGINALITY" value={runningScores.originality} color="#D85A30" />
+          <ScoreBar label={labels.logic}       value={runningScores.logic}       color="var(--red)" />
+          <ScoreBar label={labels.evidence}    value={runningScores.evidence}    color="#1D9E75" />
+          <ScoreBar label={labels.originality} value={runningScores.originality} color="var(--yellow)" />
         </div>
 
         <div className={styles.claims}>
@@ -77,7 +101,7 @@ export default function Sparring({
             <div key={i} className={styles.roundBlock}>
               <div className={styles.roundTag}>ROUND {r.round}</div>
 
-              <div className={styles.bubble + ' ' + styles.userBubble}>
+              <div className={`${styles.bubble} ${styles.userBubble}`}>
                 <div className={styles.bubbleLabel}>YOU</div>
                 <p className={styles.bubbleText}>{r.userArg}</p>
               </div>
@@ -87,12 +111,17 @@ export default function Sparring({
                   <span className={styles.microScores}>
                     L:{r.scores.logic} · E:{r.scores.evidence} · O:{r.scores.originality}
                   </span>
+                  {r.claimHits?.some(Boolean) && (
+                    <span className={styles.hitTag}>
+                      CLAIM {r.claimHits.map((h,j) => h ? j+1 : null).filter(Boolean).join(',')} HIT
+                    </span>
+                  )}
                   <span className={styles.microFeedback}>{r.scores.roundFeedback}</span>
                 </div>
               )}
 
-              <div className={styles.bubble + ' ' + styles.aiBubble}>
-                <div className={styles.bubbleLabel + ' ' + styles.aiLabel}>GYM AI</div>
+              <div className={`${styles.bubble} ${styles.aiBubble}`}>
+                <div className={`${styles.bubbleLabel} ${styles.aiLabel}`}>{aiLabel}</div>
                 <p className={styles.bubbleText}>{r.aiArg}</p>
               </div>
             </div>
@@ -103,7 +132,11 @@ export default function Sparring({
               <span className={styles.thinkDot} />
               <span className={styles.thinkDot} />
               <span className={styles.thinkDot} />
-              <span className={styles.thinkLabel}>AI is formulating counter-argument...</span>
+              <span className={styles.thinkLabel}>
+                {aiLabel === 'COUNSEL' ? 'Counsel is preparing...' :
+                 aiLabel === 'BUYER'   ? 'Buyer is objecting...' :
+                 'AI is formulating counter-argument...'}
+              </span>
             </div>
           )}
 
@@ -112,7 +145,11 @@ export default function Sparring({
         </div>
 
         <div className={styles.inputArea}>
-          {lastRound && <p className={styles.inputHint}>Respond to: <em>{lastRound.aiArg?.split('?')[0]?.slice(-80)}?</em></p>}
+          {lastRound && (
+            <p className={styles.inputHint}>
+              Respond to: <em>{lastRound.aiArg?.split('?')[0]?.slice(-80)}?</em>
+            </p>
+          )}
           <div className={styles.inputRow}>
             <textarea
               ref={inputRef}
@@ -122,10 +159,14 @@ export default function Sparring({
               onChange={e => setUserInput(e.target.value)}
               onKeyDown={handleKey}
               rows={3}
-              disabled={loading}
+              disabled={loading || allBroken}
             />
-            <button className={styles.sendBtn} onClick={onSubmit} disabled={!userInput.trim() || loading}>
-              {loading ? '...' : '→'}
+            <button
+              className={styles.sendBtn}
+              onClick={onSubmit}
+              disabled={!userInput.trim() || loading || allBroken}
+            >
+              {loading ? '…' : '→'}
             </button>
           </div>
         </div>

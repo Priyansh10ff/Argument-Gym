@@ -83,3 +83,48 @@
   transition: background 0.15s;
 }
 .resetBtn:hover { background: #c4241a; }
+
+/* ── v2 ELO delta ──────────────────────────────────────────────────────────── */
+.eloDelta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 10px 16px;
+  border: 1px solid;
+}
+.eloUp   { border-color: #1a3a1a; background: #0a110a; }
+.eloDown { border-color: var(--red-dim); background: #110a0a; }
+
+.eloIcon {
+  font-family: var(--font-display);
+  font-size: 28px;
+  line-height: 1;
+}
+.eloUp   .eloIcon { color: #4CAF50; }
+.eloDown .eloIcon { color: var(--red); }
+
+.eloChange {
+  font-family: var(--font-display);
+  font-size: 32px;
+  letter-spacing: 0.04em;
+  line-height: 1;
+}
+.eloUp   .eloChange { color: #4CAF50; }
+.eloDown .eloChange { color: var(--red); }
+
+.eloNew {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 0.06em;
+}
+.eloNew strong { color: var(--white); }
+
+.eloStreak {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--red);
+  letter-spacing: 0.06em;
+  margin-left: auto;
+}

@@ -1,31 +1,32 @@
 const BASE = '/api';
 
-export async function extractClaims({ statement, topic, stance, difficulty }) {
-  const r = await fetch(`${BASE}/extract-claims`, {
+async function post(path, body) {
+  const r = await fetch(`${BASE}${path}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ statement, topic, stance, difficulty })
+    body: JSON.stringify(body)
   });
   if (!r.ok) throw new Error(await r.text());
   return r.json();
 }
 
-export async function argue({ messages, topic, stance, difficulty, claims }) {
-  const r = await fetch(`${BASE}/argue`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ messages, topic, stance, difficulty, claims })
-  });
+async function get(path) {
+  const r = await fetch(`${BASE}${path}`);
   if (!r.ok) throw new Error(await r.text());
   return r.json();
 }
 
-export async function getVerdict({ messages, topic, stance, difficulty, claims, sideSwitch }) {
-  const r = await fetch(`${BASE}/verdict`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ messages, topic, stance, difficulty, claims, sideSwitch })
-  });
-  if (!r.ok) throw new Error(await r.text());
-  return r.json();
-}
+export const extractClaims = (body) => post('/extract-claims', body);
+export const argue = (body) => post('/argue', body);
+export const getVerdict = (body) => post('/verdict', body);
+
+// User / ELO
+export const initUser = (userId, name) => post('/user/init', { userId, name });
+export const getUser = (userId) => get(`/user/${userId}`);
+export const setUserName = (userId, name) => post(`/user/${userId}/name`, { name });
+export const updateElo = (body) => post('/elo/update', body);
+export const getLeaderboard = () => get('/leaderboard');
+
+// HvH
+export const createHvHRoom = (body) => post('/hvh/create', body);
+export const getHvHRoom = (roomId) => get(`/hvh/room/${roomId}`);

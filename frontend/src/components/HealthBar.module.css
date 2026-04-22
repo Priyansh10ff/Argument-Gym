@@ -1,0 +1,79 @@
+.wrap { margin-bottom: 0; }
+
+.title {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+}
+
+.row {
+  margin-bottom: 8px;
+  padding: 6px 8px;
+  border: 1px solid var(--gray-mid);
+  transition: border-color 0.3s;
+}
+.broken {
+  border-color: var(--red-dim);
+  opacity: 0.6;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-bottom: 5px;
+}
+.num {
+  font-family: var(--font-display);
+  font-size: 16px;
+  color: var(--red);
+  line-height: 1.1;
+  flex-shrink: 0;
+}
+.broken .num { color: var(--gray-light); }
+.text {
+  font-size: 10px;
+  color: var(--text-dim);
+  line-height: 1.4;
+  flex: 1;
+}
+.brokenTag {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.1em;
+  color: var(--red);
+  border: 1px solid var(--red-dim);
+  padding: 1px 5px;
+  flex-shrink: 0;
+}
+
+.barBg {
+  height: 3px;
+  background: var(--black);
+  margin-bottom: 4px;
+  overflow: hidden;
+}
+.barFill {
+  height: 100%;
+  transition: width 0.5s ease, background 0.5s ease;
+}
+.barCracked {
+  height: 100%;
+  width: 100%;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--red-dim) 0 5px,
+    transparent 5px 8px
+  );
+}
+
+.pips { display: flex; gap: 3px; }
+.pip {
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--gray-light);
+}
+.pipOn  { background: var(--red); border-color: var(--red-dim); }
+.pipOff { background: transparent; }

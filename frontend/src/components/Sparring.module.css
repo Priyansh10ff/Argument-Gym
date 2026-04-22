@@ -188,3 +188,34 @@
   .roundDisplay { display: none; }
   .claims { display: none; }
 }
+
+/* ── v2 additions ──────────────────────────────────────────────────────────── */
+.allBrokenAlert {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--red);
+  border: 1px solid var(--red-dim);
+  background: #110a0a;
+  padding: 6px 10px;
+  text-align: center;
+}
+
+.hitTag {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: var(--red);
+  border: 1px solid var(--red-dim);
+  padding: 1px 5px;
+  flex-shrink: 0;
+}
+
+.modeBadge {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--yellow);
+  border: 1px solid #5a4a10;
+  padding: 2px 7px;
+}
