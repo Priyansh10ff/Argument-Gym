@@ -2,19 +2,19 @@
   <img src="https://raw.githubusercontent.com/Priyansh10ff/Argument-Gym/main/frontend/public/favicon.ico" alt="Argument Gym Logo" width="120" />
   <h1>🥊 Argument Gym</h1>
   <p><strong>Your arguments are weaker than you think.</strong></p>
-  <p>An AI sparring partner that fights back, scores your logic, remembers your weaknesses, and gets harder to beat the better you get.</p>
+  <p>An AI-powered sparring arena designed to sharpen your logic, improve your sales objections, and prepare you for high-stakes debates.</p>
 
-  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
   [![Vite](https://img.shields.io/badge/vite-%23646CFF.svg?style=flat&logo=vite&logoColor=white)](https://vitejs.dev/)
   [![React](https://img.shields.io/badge/react-%2320232a.svg?style=flat&logo=react&logoColor=%2361DAFB)](https://reactjs.org/)
   [![Convex](https://img.shields.io/badge/Convex-Black?style=flat&logo=convex&logoColor=white)](https://convex.dev/)
+  [![OpenRouter](https://img.shields.io/badge/OpenRouter-AI-red)](https://openrouter.ai/)
 
   <br />
-  <a href="#features">Features</a> ·
-  <a href="#demo">Live Demo</a> ·
-  <a href="#installation">Installation</a> ·
-  <a href="#how-it-works">How It Works</a> ·
-  <a href="#contributing">Contributing</a>
+  <a href="#-features">Features</a> ·
+  <a href="#-modes">Modes</a> ·
+  <a href="#-tech-stack">Tech Stack</a> ·
+  <a href="#-setup">Setup</a> ·
+  <a href="#-how-it-works">How It Works</a>
 </div>
 
 ---
@@ -22,109 +22,86 @@
 ## 🌟 Why Argument Gym?
 
 Most AI tools are built to agree with you. **Argument Gym** is built to challenge you. 
-Whether you're preparing for a debate, training for sales objections, or practicing courtroom cross-examinations, Argument Gym forces you to articulate your points clearly and defends against them relentlessly.
 
-Built with **React**, **Vite**, and **Convex**, Argument Gym features real-time multiplayer lobbies, an adaptive ELO rating system, and lightning-fast AI streaming via OpenRouter.
+Whether you're preparing for a critical debate, training for sales objections, or practicing courtroom cross-examinations, Argument Gym forces you to articulate your points clearly and defends against them relentlessly. It's the only platform that scores your logic in real-time and adapts its difficulty as you get stronger.
+
+---
 
 ## ✨ Features
 
-- **🧠 Adaptive AI Opponent**: The AI tracks your logic, evidence, and originality. It remembers your logical fallacies across sessions and targets your weakest points.
-- **🏆 Gamified Profile (Chess.com Style)**: Earn ELO points, maintain win streaks, and climb the global leaderboard.
-- **🤝 Human vs Human (HvH) Mode**: Debate a real opponent in real-time while an AI judge monitors the exchange, scores it live, and delivers a final verdict.
-- **👀 Spectator Mode**: Join live HvH debates just to watch the drama unfold.
-- **🔄 Multiple Training Modes**:
-  - `Standard Gym`: Pure adversarial debate.
-  - `Court Gym`: Dual-role AI (opposing counsel + live judge rulings).
-  - `Sales Gym`: Practice pitching against skeptical personas (CFO, VP, Technical Buyer).
-- **☁️ Modern Cloud Stack**: Fully reactive backend powered by **Convex**, with `@convex-dev/auth` for seamless Guest & Google authentication.
-- **🤖 Bring Your Own Model**: Switch between GPT-4o, Claude 3.5 Sonnet, Gemini 1.5 Pro, and Llama 3 via OpenRouter.
+### 🎮 Gamified Experience
+- **ELO Rating System:** Gain and lose points based on your performance. Rise through the global ranks.
+- **Achievements:** Unlock badges like *Flawless Victory*, *Unstoppable*, and *Veteran* as you master the art of persuasion.
+- **Global Leaderboard:** Compete for the #1 spot globally or today's top delta.
+
+### 🧠 Intelligent Sparring
+- **Adaptive Weakness Memory:** The AI tracks your recurring logical fallacies and weakest arguments across sessions to proactively target them.
+- **Custom Personas:** Don't just fight an AI—fight a *Technical Buyer*, a *Skeptical CFO*, or even a *Grumpy 19th Century Philosopher* using custom persona injection.
+- **Daily Challenge:** A synchronized daily topic for the entire community to debate.
+
+### 🎙️ Modern Interface
+- **Voice Integration:** Speak your arguments using Speech-to-Text (STT) and hear the AI respond with Text-to-Speech (TTS).
+- **Match Replays:** Every debate is saved. Generate a shareable link to show off your winning arguments to colleagues or friends.
+- **Real-time Scoring:** AI judges your logic, evidence, and originality on every turn.
 
 ---
 
-## 🚀 Getting Started (Local Development)
+## 🎭 Modes
 
-Argument Gym is designed to be easily self-hosted. 
-
-### Prerequisites
-- [Node.js](https://nodejs.org/) (v18+)
-- [npm](https://www.npmjs.com/)
-- An [OpenRouter API Key](https://openrouter.ai/) for the AI models.
-- A [Convex](https://convex.dev/) account (Free tier is perfectly fine!).
-
-### Installation
-
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/Priyansh10ff/Argument-Gym.git
-   cd Argument-Gym/frontend
-   ```
-
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
-
-3. **Initialize Convex:**
-   ```bash
-   npx convex dev
-   ```
-   *This will prompt you to log into Convex and create a new project. It will automatically create your `.env.local` file with your `VITE_CONVEX_URL`.*
-
-4. **Set your Environment Variables:**
-   You need to set your secrets securely in your Convex dashboard. Run the following commands:
-   ```bash
-   npx convex env set PRIMARY_LLM_API_KEY="your-openrouter-key"
-   npx convex env set PRIMARY_LLM_BASE_URL="https://openrouter.ai/api/v1"
-   
-   # For Google Auth (Optional, but required for persistent login)
-   npx convex env set GOOGLE_CLIENT_ID="your-google-client-id"
-   npx convex env set GOOGLE_CLIENT_SECRET="your-google-client-secret"
-   ```
-
-5. **Start the Frontend Development Server:**
-   In a new terminal window (keep `npx convex dev` running):
-   ```bash
-   npm run dev
-   ```
-
-6. **Open your browser!** Navigate to `http://localhost:5173`.
-
----
-
-## 🕹️ How It Works
-
-1. **Pick your fight:** Choose a topic, take a stance, and set the difficulty (Casual, Rigorous, or Brutal).
-2. **Make your case:** Write your opening argument. The AI extracts 3 core claims, assigning each a "health bar."
-3. **Survive the rounds:** The AI argues the opposite. It targets your weakest claim every round. Health bars deplete in real time as the AI dismantle your points.
-4. **Face the verdict:** You are scored across logic, evidence, and originality. Your ELO rating is updated, and your weakness profile is refined for the next match.
+| Mode | AI Persona | Goal |
+| :--- | :--- | :--- |
+| **Standard** | Logical Socratic | Broad intellectual sparring and logic testing. |
+| **Sales** | Skeptical Buyer | Practice overcoming objections and closing deals. |
+| **Courtroom** | Opposing Counsel | Defend your claims against aggressive cross-examination. |
+| **Human vs Human** | None | Private lobby matchmaking to debate friends directly. |
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Frontend:** React 18, Vite, CSS Modules
-- **Backend & Database:** Convex (Serverless reactive database, queries, mutations, and actions)
-- **Authentication:** Convex Auth (Guest Sessions & Google OAuth)
-- **AI Integration:** OpenRouter (OpenAI-compatible API format) using Server-Sent Events (SSE) for streaming.
+- **Frontend:** React 18, Vite, CSS Modules (Custom Design System)
+- **Backend:** [Convex](https://convex.dev) (Real-time Database, Functions, Cron)
+- **AI Intelligence:** OpenRouter (Claude/Llama) with custom streaming prompts.
+- **Auth:** Convex Auth (Guest Sessions & Google OAuth).
+- **Voice:** Web Speech API (STT/TTS).
 
 ---
 
-## 🤝 Contributing
+## 🚀 Setup
 
-Contributions are always welcome! If you have ideas for new game modes, better UI/UX, or more robust AI prompts, please feel free to open an issue or submit a Pull Request.
+### 1. Clone the repository
+```bash
+git clone https://github.com/Priyansh10ff/Argument-Gym.git
+cd argument-gym
+```
 
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+### 2. Install Dependencies
+```bash
+npm install
+cd frontend && npm install
+```
+
+### 3. Environment Setup
+Create a `.env.local` in the `frontend` directory:
+```env
+VITE_CONVEX_URL=your_convex_url
+PRIMARY_LLM_API_KEY=your_openrouter_key
+```
+
+### 4. Run Locally
+```bash
+# In the root directory
+npm run dev
+```
 
 ---
 
-## 📜 License
+## 🛡️ License
 
 Distributed under the MIT License. See `LICENSE` for more information.
 
+---
+
 <div align="center">
-  <p>Built with ❤️ by <a href="https://github.com/Priyansh10ff">Priyansh</a>.</p>
+  Built with ❤️ for better arguments.
 </div>
