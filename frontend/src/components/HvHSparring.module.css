@@ -1,0 +1,151 @@
+/* ── Main layout ─────────────────────────────────────────────────────────── */
+.wrap { display: flex; height: 100vh; overflow: hidden; background: var(--black); }
+
+/* ── Arena (left) ────────────────────────────────────────────────────────── */
+.arena { flex: 1; display: flex; flex-direction: column; border-right: 1px solid var(--gray-light); min-width: 0; }
+
+.arenaHeader {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding: 10px 1.25rem; border-bottom: 1px solid var(--gray-light);
+  background: var(--gray);
+}
+.arenaTopicChip { font-size: 12px; color: var(--white); font-weight: 300; flex: 1; }
+.arenaPlayers { display: flex; gap: 8px; }
+.playerTag {
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em;
+  color: var(--text-dim); border: 1px solid var(--gray-light); padding: 2px 8px;
+}
+.myTag { color: var(--white); border-color: var(--gray-light); background: var(--gray-mid); }
+
+.feed { flex: 1; overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; }
+
+.msgBlock { display: flex; flex-direction: column; max-width: 78%; }
+.msgBlock:has(.myBubble) { align-self: flex-end; align-items: flex-end; }
+.msgBlock:has(.oppBubble) { align-self: flex-start; align-items: flex-start; }
+
+.msgLabel {
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em;
+  color: var(--text-dim); margin-bottom: 4px;
+}
+.myMsgLabel { color: var(--text-dim); }
+
+.bubble { padding: 10px 14px; font-size: 14px; line-height: 1.7; font-weight: 300; }
+.myBubble  { background: var(--gray); border: 1px solid var(--gray-light); color: var(--white); }
+.oppBubble { background: #110a0a; border: 1px solid #3a1a1a; color: var(--white); }
+
+.thinking { display: flex; align-items: center; gap: 8px; padding: .75rem 0; }
+.thinkDot { width: 6px; height: 6px; background: var(--red); animation: blink 1.2s ease infinite; }
+.thinkDot:nth-child(2) { animation-delay: 0.2s; }
+.thinkDot:nth-child(3) { animation-delay: 0.4s; }
+.thinkLabel { font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); letter-spacing: 0.08em; }
+
+.errBox { background: #1a0a0a; border: 1px solid var(--red-dim); color: var(--red); padding: 10px; font-size: 13px; font-family: var(--font-mono); font-size: 11px; }
+
+.inputArea { border-top: 1px solid var(--gray-mid); padding: .75rem 1.25rem; background: var(--black); }
+.inputRow { display: flex; gap: 8px; align-items: flex-end; margin-bottom: 6px; }
+.textarea {
+  flex: 1; background: var(--gray); border: 1px solid var(--gray-light);
+  color: var(--white); padding: 10px 14px; font-size: 14px;
+  font-family: var(--font-body); resize: none; line-height: 1.6;
+  transition: border-color 0.2s;
+}
+.textarea:focus { outline: none; border-color: var(--red); }
+.textarea::placeholder { color: var(--text-dim); font-size: 13px; }
+.textarea:disabled { opacity: 0.5; }
+.sendBtn {
+  background: #4CAF50; color: var(--black);
+  width: 44px; height: 44px; font-size: 18px;
+  font-family: var(--font-display); flex-shrink: 0;
+  border: none; cursor: pointer; transition: background 0.15s;
+}
+.sendBtn:hover:not(:disabled) { background: #5cbf60; }
+.sendBtn:disabled { opacity: 0.35; cursor: not-allowed; }
+.verdictBtn {
+  width: 100%; background: transparent;
+  border: 1px solid var(--gray-light); color: var(--text-dim);
+  padding: 8px; font-family: var(--font-mono);
+  font-size: 10px; letter-spacing: 0.1em; cursor: pointer;
+  transition: all 0.15s;
+}
+.verdictBtn:hover:not(:disabled) { border-color: var(--white); color: var(--white); }
+
+/* ── AI Monitor (right) ──────────────────────────────────────────────────── */
+.monitor {
+  width: 260px; flex-shrink: 0;
+  background: var(--gray); border-left: 1px solid var(--gray-light);
+  display: flex; flex-direction: column; padding: 1.25rem;
+  overflow-y: auto; gap: 1.25rem;
+}
+.monitorBadge {
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.15em;
+  color: var(--red); border: 1px solid var(--red-dim);
+  display: inline-block; padding: 3px 8px;
+}
+.monitorSub { font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); }
+.monitorEmpty { font-size: 12px; color: var(--text-dim); font-weight: 300; line-height: 1.6; }
+
+.latestBox { background: var(--black); border: 1px solid var(--gray-light); padding: .75rem; }
+.roundTag { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.15em; color: var(--text-dim); margin-bottom: 8px; }
+
+.playerScoreRow { padding: 6px 0; border-bottom: 1px solid var(--gray-mid); }
+.mineRow { background: var(--gray-mid); margin: 0 -.75rem; padding: 6px .75rem; }
+.psTop { display: flex; align-items: center; justify-content: space-between; margin-bottom: 3px; }
+.psName { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.08em; color: var(--text-dim); }
+.psScores { display: flex; gap: 8px; }
+.psScores span { font-family: var(--font-display); font-size: 14px; color: var(--white); }
+.psFeedback { font-size: 10px; color: var(--text-dim); font-style: italic; line-height: 1.4; }
+
+.insight { margin-top: 8px; }
+.insightLabel { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em; color: var(--text-dim); display: block; margin-bottom: 4px; }
+.insightText { font-size: 11px; color: var(--text-dim); font-style: italic; margin: 0; line-height: 1.5; }
+
+.momentum { display: flex; align-items: center; gap: 8px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--gray-mid); }
+.momentumLabel { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em; color: var(--text-dim); }
+.momentumVal { font-family: var(--font-mono); font-size: 10px; color: #4CAF50; }
+
+.history { }
+.historyLabel { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.12em; color: var(--text-dim); margin-bottom: 8px; }
+.historyRow { display: flex; align-items: center; gap: 10px; padding: 4px 0; border-bottom: 1px solid var(--gray-mid); }
+.histRound { font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); width: 20px; }
+.histWinner { font-family: var(--font-mono); font-size: 10px; color: var(--white); }
+
+/* ── Waiting screen ──────────────────────────────────────────────────────── */
+.waitWrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; position: relative; }
+.noise { position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events: none; z-index: 0; }
+.waitInner { text-align: center; position: relative; z-index: 1; padding: 2rem; animation: fadeUp 0.4s ease both; }
+.waitTitle { font-family: var(--font-display); font-size: clamp(28px,6vw,48px); letter-spacing: 0.04em; color: var(--white); margin-bottom: 2rem; }
+.codeBox { background: var(--gray); border: 1px solid var(--gray-light); padding: 1.5rem 2rem; display: inline-block; margin-bottom: 1.5rem; }
+.codeBoxLabel { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.15em; color: var(--text-dim); margin-bottom: 8px; }
+.codeBoxCode { font-family: var(--font-display); font-size: 3rem; letter-spacing: 6px; color: var(--white); margin: 0; }
+.waitTopic { font-size: 14px; color: var(--text-dim); margin-bottom: 1.5rem; font-weight: 300; }
+.waitTopic strong { color: var(--white); }
+.error { font-family: var(--font-mono); font-size: 11px; color: var(--red); margin-bottom: 1rem; }
+.waitDots { display: flex; justify-content: center; gap: 6px; margin-bottom: 2rem; }
+.waitDots span { width: 6px; height: 6px; background: var(--red); animation: blink 1.2s infinite; }
+
+/* ── Verdict screen ──────────────────────────────────────────────────────── */
+.verdictWrap { min-height: 100vh; display: flex; align-items: flex-start; justify-content: center; padding: 2rem 1rem; position: relative; }
+.verdictInner { width: 100%; max-width: 680px; position: relative; z-index: 1; animation: fadeUp 0.5s ease both; display: flex; flex-direction: column; gap: 1.5rem; }
+.verdictBanner { border: 2px solid; padding: 1.5rem 2rem; font-family: var(--font-display); font-size: clamp(36px,8vw,64px); letter-spacing: 0.06em; }
+.vWon  { border-color: #4CAF50; color: #4CAF50; background: #0a1a0a; }
+.vDraw { border-color: var(--yellow); color: var(--yellow); background: #1a1500; }
+.vLost { border-color: var(--red); color: var(--red); background: #1a0a0a; }
+.vAnalysis { background: var(--gray); border-left: 3px solid var(--red); padding: 1.25rem 1.5rem; }
+.vLabel { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.15em; color: var(--text-dim); margin-bottom: 8px; }
+.vText { font-size: 14px; color: var(--white); font-style: italic; margin: 0; line-height: 1.7; font-weight: 300; }
+.vPlayers { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.vCard { background: var(--gray); border: 1px solid var(--gray-light); padding: 1rem; }
+.vCardMe { border-color: var(--white); }
+.vPlayerName { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; color: var(--text-dim); margin: 0 0 4px; }
+.vScore { font-family: var(--font-display); font-size: 48px; color: var(--white); line-height: 1; margin: 0 0 8px; }
+.vScore span { font-size: 18px; color: var(--text-dim); }
+.vStrength { font-size: 12px; color: #4CAF50; margin: 2px 0; font-weight: 300; }
+.vWeakness { font-size: 12px; color: var(--red); margin: 2px 0; font-weight: 300; }
+.vBest { background: var(--gray); border: 1px solid var(--gray-light); padding: 1rem 1.25rem; }
+.backBtn {
+  background: transparent; border: 1px solid var(--gray-light);
+  color: var(--text-dim); padding: 12px 24px;
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em;
+  cursor: pointer; transition: all 0.15s;
+}
+.backBtn:hover { border-color: var(--white); color: var(--white); }

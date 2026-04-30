@@ -1,21 +1,128 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useGym, PHASES } from './hooks/useGym';
-import Landing from './components/Landing';
-import Statement from './components/Statement';
+import MarketingPage from './components/MarketingPage';
+import Landing     from './components/Landing';
+import Statement   from './components/Statement';
+import Loader      from './components/Loader';
 import ClaimsConfirm from './components/ClaimsConfirm';
-import Sparring from './components/Sparring';
+import Sparring    from './components/Sparring';
 import SideSwitchOffer from './components/SideSwitchOffer';
-import Verdict from './components/Verdict';
-import Loader from './components/Loader';
+import Verdict     from './components/Verdict';
+import HvHLobby    from './components/HvHLobby';
+import HvHSparring from './components/HvHSparring';
+import PublicLobby from './components/PublicLobby';
+import SpectatorView from './components/SpectatorView';
+import Profile     from './components/Profile';
+import { getUserName } from './lib/identity';
 
 export default function App() {
   const gym = useGym();
+  const [showMarketing, setShowMarketing] = useState(true);
+  const [hvhMode, setHvhMode]       = useState(null);   // null | 'lobby' | 'room'
+  const [hvhData, setHvhData]       = useState(null);
+  const [lobbyMode, setLobbyMode]   = useState(false);
+  const [profileMode, setProfileMode] = useState(false);
+  const [spectating, setSpectating] = useState(null);   // { roomId, roomCode }
 
-  const handleStart = ({ topic, stance, difficulty }) => {
-    gym.setTopic(topic);
-    gym.setStance(stance);
-    gym.setDifficulty(difficulty);
-    gym.startDebate(topic);
+  // Handle ?join=XXXX query param on page load
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const joinCode = params.get('join');
+    if (joinCode && joinCode.length === 8) {
+      setShowMarketing(false);
+      setHvhMode('room');
+      setHvhData({
+        roomCode: joinCode.toUpperCase(),
+        userId: localStorage.getItem('arg_gym_uid') || crypto.randomUUID(),
+        name: getUserName() || 'Anonymous',
+      });
+      // Clean URL
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
+
+  // ─── Marketing page ───
+  if (showMarketing && gym.phase === PHASES.LANDING && !hvhMode && !lobbyMode && !profileMode && !spectating) {
+    return <MarketingPage onEnter={() => setShowMarketing(false)} />;
+  }
+
+  // ─── Public Lobby ───
+  if (lobbyMode) {
+    return (
+      <PublicLobby
+        onBack={() => setLobbyMode(false)}
+        onJoinRoom={(data) => {
+          setLobbyMode(false);
+          setHvhMode('room');
+          setHvhData(data);
+        }}
+        onSpectate={(data) => {
+          setLobbyMode(false);
+          setSpectating(data);
+        }}
+      />
+    );
+  }
+
+  // ─── Spectator View ───
+  if (spectating) {
+    return (
+      <SpectatorView
+        roomId={spectating.roomId}
+        onBack={() => setSpectating(null)}
+      />
+    );
+  }
+
+  // ─── HvH Lobby ───
+  if (hvhMode === 'lobby') {
+    return (
+      <HvHLobby
+        onEnterRoom={(data) => { setHvhData(data); setHvhMode('room'); }}
+        onBack={() => setHvhMode(null)}
+      />
+    );
+  }
+
+  // ─── HvH Room ───
+  if (hvhMode === 'room' && hvhData) {
+    return (
+      <HvHSparring
+        roomId={hvhData.roomId}
+        roomCode={hvhData.roomCode}
+        userId={hvhData.userId}
+        name={hvhData.name}
+        onBack={() => { setHvhMode(null); setHvhData(null); }}
+      />
+    );
+  }
+
+  // ─── Profile ───
+  if (profileMode) {
+    return <Profile onBack={() => setProfileMode(false)} />;
+  }
+
+  // ─── Single-player phases ───
+  const handleStart = (opts) => {
+    if (opts.mode === 'hvh') {
+      setHvhMode('lobby');
+      return;
+    }
+    if (opts.mode === 'lobby') {
+      setLobbyMode(true);
+      return;
+    }
+    if (opts.mode === 'profile') {
+      setProfileMode(true);
+      return;
+    }
+    gym.setMode(opts.mode || 'standard');
+    gym.setModel(opts.model || 'auto');
+    gym.setDifficulty(opts.difficulty || 'rigorous');
+    gym.setStance(opts.stance || 'for');
+    gym.setScenario(opts.scenario || '');
+    gym.setPersona(opts.persona || 'skeptical_cfo');
+    gym.startDebate(opts.topic);
   };
 
   switch (gym.phase) {
@@ -25,28 +132,24 @@ export default function App() {
     case PHASES.STATEMENT:
       return (
         <Statement
-          topic={gym.topic}
-          stance={gym.stance}
-          difficulty={gym.difficulty}
-          statement={gym.statement}
-          setStatement={gym.setStatement}
+          topic={gym.topic} stance={gym.stance} difficulty={gym.difficulty}
+          mode={gym.mode}
+          statement={gym.statement} setStatement={gym.setStatement}
           onSubmit={gym.submitStatement}
           onBack={gym.reset}
-          loading={gym.loading}
         />
       );
 
     case PHASES.EXTRACTING:
-      return <Loader message="ANALYZING YOUR ARGUMENT" sub="Extracting core claims..." />;
+      return <Loader />;
 
     case PHASES.CLAIMS_CONFIRM:
       return (
         <ClaimsConfirm
-          claims={gym.claims}
-          claimSummary={gym.claimSummary}
-          topic={gym.topic}
+          claims={gym.claims} summary={gym.claimSummary}
           onConfirm={gym.confirmClaims}
-          loading={gym.loading}
+          onBack={gym.reset}
+          mode={gym.mode}
         />
       );
 
@@ -54,45 +157,36 @@ export default function App() {
     case PHASES.SIDE_SWITCHING:
       return (
         <Sparring
-          topic={gym.topic}
-          stance={gym.stance}
-          difficulty={gym.difficulty}
-          claims={gym.claims}
-          rounds={gym.rounds}
-          currentRound={gym.currentRound}
-          userInput={gym.userInput}
-          setUserInput={gym.setUserInput}
-          loading={gym.loading || gym.phase === PHASES.SIDE_SWITCHING}
-          error={gym.error}
-          runningScores={gym.runningScores}
+          topic={gym.topic} stance={gym.stance} difficulty={gym.difficulty}
+          claims={gym.claims} claimsHp={gym.claimsHp} MAX_CLAIM_HP={gym.MAX_CLAIM_HP}
+          rounds={gym.rounds} currentRound={gym.currentRound}
+          userInput={gym.userInput} setUserInput={gym.setUserInput}
+          loading={gym.loading} error={gym.error} runningScores={gym.runningScores}
           MAX_ROUNDS={gym.MAX_ROUNDS}
-          onSubmit={gym.submitRound}
-          onEndEarly={gym.endEarly}
-          sideSwitch={gym.sideSwitch}
+          onSubmit={gym.submitRound} onEndEarly={gym.endEarly}
+          sideSwitch={gym.sideSwitch} mode={gym.mode}
+          streamingText={gym.streamingText}
         />
       );
 
     case PHASES.SIDE_SWITCH_OFFER:
       return (
         <SideSwitchOffer
-          stance={gym.stance}
+          topic={gym.topic} stance={gym.stance}
           onAccept={gym.acceptSideSwitch}
           onDecline={gym.declineSideSwitch}
-          loading={gym.loading}
         />
       );
 
     case PHASES.VERDICT_LOADING:
-      return <Loader message="CALCULATING VERDICT" sub="Reviewing all rounds..." />;
+      return <Loader message="AI is generating final verdict..." />;
 
     case PHASES.VERDICT:
       return (
         <Verdict
-          verdict={gym.verdict}
-          topic={gym.topic}
-          stance={gym.stance}
-          sideSwitch={gym.sideSwitch}
-          onReset={gym.reset}
+          verdict={gym.verdict} topic={gym.topic} stance={gym.stance}
+          claims={gym.claims} eloResult={gym.eloResult}
+          onRestart={gym.reset} mode={gym.mode}
         />
       );
 

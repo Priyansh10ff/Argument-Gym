@@ -188,3 +188,79 @@
   .roundDisplay { display: none; }
   .claims { display: none; }
 }
+
+/* ── v2 additions (preserve all original styles above) ── */
+.allBrokenAlert {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--red);
+  border: 1px solid var(--red-dim);
+  background: #110a0a;
+  padding: 6px 10px;
+  text-align: center;
+}
+.hitTag {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: var(--red);
+  border: 1px solid var(--red-dim);
+  padding: 1px 5px;
+  flex-shrink: 0;
+}
+.modeBadge {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--yellow);
+  border: 1px solid #5a4a10;
+  padding: 2px 7px;
+}
+/* Judge ruling bubble — courtroom mode */
+.judgeBubble {
+  background: #0d0d00;
+  border: 1px solid #4a3a00;
+  border-left: 3px solid var(--yellow);
+  padding: 10px 14px;
+  max-width: 80%;
+  align-self: center;
+}
+.judgeLabel {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  color: var(--yellow);
+  margin-bottom: 5px;
+}
+.judgeRuling {
+  font-size: 13px;
+  color: var(--white);
+  margin: 0 0 4px;
+  font-weight: 300;
+  line-height: 1.6;
+  font-style: italic;
+}
+.judgeNote {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ── v2 additions ──────────────────────────────────────────────────────────── */
+.allBrokenAlert { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em; color: var(--red); border: 1px solid var(--red-dim); background: #110a0a; padding: 6px 10px; text-align: center; }
+.hitTag { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.08em; color: var(--red); border: 1px solid var(--red-dim); padding: 1px 5px; flex-shrink: 0; }
+.modeBadge { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em; color: var(--yellow); border: 1px solid #5a4a10; padding: 2px 7px; }
+
+/* Judge ruling block */
+.judgeBlock { display: flex; align-items: center; gap: 10px; align-self: center; padding: 5px 14px; background: #0a0a0f; border: 1px solid var(--gray-mid); flex-wrap: wrap; }
+.judgeTag { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.15em; color: var(--text-dim); }
+.judgeRuling { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.08em; font-weight: 500; }
+.ruling_sustained { color: var(--red); }
+.ruling_overruled { color: #4CAF50; }
+.ruling_noted { color: var(--yellow); }
+.judgeComment { font-size: 11px; color: var(--text-dim); font-style: italic; }
+
+/* ── Streaming cursor ─────────────────────────────────────────────────────── */
+.streamCursor { color: var(--red); animation: blink 0.8s step-end infinite; margin-left: 1px; }
