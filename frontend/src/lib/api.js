@@ -19,7 +19,10 @@ export async function streamArgue(body) {
   });
 
   if (!response.ok) {
-    throw new Error(`Stream failed: ${response.status}`);
+    if (response.status === 429) {
+      throw new Error("AI is currently overwhelmed. Please try again later.");
+    }
+    throw new Error(`AI Provider failed with status: ${response.status}`);
   }
 
   return response.body.getReader();

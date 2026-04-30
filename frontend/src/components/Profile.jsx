@@ -26,6 +26,17 @@ export default function Profile({ onBack }) {
   const { history, rank } = userStats;
   const wp = weaknessProfile;
 
+  const parseJSON = (str, fallback) => {
+    try {
+      return str ? JSON.parse(str) : fallback;
+    } catch {
+      return fallback;
+    }
+  };
+
+  const commonW = wp ? parseJSON(wp.commonWeaknesses, []) : [];
+  const fallacyH = wp ? parseJSON(wp.fallacyHits, {}) : {};
+
   return (
     <div className={styles.wrap}>
        <div className={styles.noise} />
@@ -85,19 +96,19 @@ export default function Profile({ onBack }) {
                        <span className={styles.wpNum}>{wp.originalityAvg.toFixed(1)}</span>
                      </div>
                    </div>
-                   {wp.commonWeaknesses && JSON.parse(wp.commonWeaknesses).length > 0 && (
+                   {commonW.length > 0 && (
                      <div className={styles.wpSection}>
                        <p className={styles.wpLabelSub}>Recurring Weaknesses</p>
                        <ul className={styles.wpList}>
-                         {JSON.parse(wp.commonWeaknesses).map((w, i) => <li key={i}>{w}</li>)}
+                         {commonW.map((w, i) => <li key={i}>{w}</li>)}
                        </ul>
                      </div>
                    )}
-                   {wp.fallacyHits && Object.keys(JSON.parse(wp.fallacyHits)).length > 0 && (
+                   {Object.keys(fallacyH).length > 0 && (
                      <div className={styles.wpSection}>
                        <p className={styles.wpLabelSub}>Detected Fallacies</p>
                        <div className={styles.fallacyTags}>
-                         {Object.entries(JSON.parse(wp.fallacyHits)).map(([f, count]) => (
+                         {Object.entries(fallacyH).map(([f, count]) => (
                            <span key={f} className={styles.fallacyTag}>{f} <span className={styles.fallacyCount}>{count}</span></span>
                          ))}
                        </div>

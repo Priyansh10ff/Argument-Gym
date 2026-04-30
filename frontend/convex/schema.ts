@@ -41,7 +41,8 @@ export default defineSchema({
     originalityScore: v.number(),
   })
     .index("by_userId", ["userId"])
-    .index("by_userId_date", ["userId", "date"]),
+    .index("by_userId_date", ["userId", "date"])
+    .index("by_date", ["date"]),
 
   // ─── Weakness Profiles (adaptive AI) ─────────────────────────────────────────
   weaknessProfiles: defineTable({

@@ -79,6 +79,13 @@ export default function Landing({ onStart }) {
           </div>
         </nav>
 
+        {/* Guest Warning */}
+        {auth.isGuest && (
+          <div className={styles.guestWarning}>
+             <span>⚠️ <strong>Guest Mode:</strong> Your progress is saved locally. Connect a Google account in your Profile to permanently secure your ELO.</span>
+          </div>
+        )}
+
         <div className={styles.badge}>AI SPARRING PARTNER</div>
         <h1 className={styles.title}>ARGUMENT<br />GYM</h1>
         <p className={styles.sub}>Enter the ring. Defend your position.<br />Walk out thinking sharper.</p>

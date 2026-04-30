@@ -1,5 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { Id } from "./_generated/dataModel";
 
 // ─── Get or Create User ────────────────────────────────────────────────────────
 export const getOrCreateUser = mutation({
@@ -176,11 +177,13 @@ export const getLeaderboard = query({
   args: {},
   handler: async (ctx) => {
     // Global — top 50 by ELO
-    const allUsers = await ctx.db.query("users").collect();
-    const global = allUsers
-      .sort((a, b) => b.elo - a.elo)
-      .slice(0, 50)
-      .map((u) => ({
+    const topUsers = await ctx.db
+      .query("users")
+      .withIndex("by_elo")
+      .order("desc")
+      .take(50);
+
+    const global = topUsers.map((u) => ({
         id: u._id,
         name: u.name || "Anonymous",
         elo: u.elo,
@@ -195,12 +198,14 @@ export const getLeaderboard = query({
 
     // Daily — top 50 by delta today
     const today = new Date().toISOString().slice(0, 10);
-    const allDebatesToday = await ctx.db.query("debates").collect();
-    const todayDebates = allDebatesToday.filter((d) => d.date === today);
+    const todayDebates = await ctx.db
+      .query("debates")
+      .withIndex("by_date", (q) => q.eq("date", today))
+      .collect();
 
     const dailyMap = new Map<
       string,
-      { userId: string; delta: number; count: number }
+      { userId: Id<"users">; delta: number; count: number }
     >();
     for (const d of todayDebates) {
       const key = d.userId;
@@ -209,7 +214,7 @@ export const getLeaderboard = query({
         existing.delta += d.eloDelta;
         existing.count += 1;
       } else {
-        dailyMap.set(key, { userId: key, delta: d.eloDelta, count: 1 });
+        dailyMap.set(key, { userId: d.userId, delta: d.eloDelta, count: 1 });
       }
     }
 
@@ -219,7 +224,7 @@ export const getLeaderboard = query({
 
     const daily = await Promise.all(
       dailyEntries.map(async (entry) => {
-        const user = await ctx.db.get(entry.userId as any);
+        const user = await ctx.db.get(entry.userId);
         return {
           id: entry.userId,
           name: user?.name || "Anonymous",

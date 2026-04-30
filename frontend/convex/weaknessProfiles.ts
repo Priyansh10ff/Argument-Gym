@@ -1,6 +1,15 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 
+function safeParse<T>(jsonStr: string | undefined, fallback: T): T {
+  try {
+    if (!jsonStr) return fallback;
+    return JSON.parse(jsonStr) as T;
+  } catch (e) {
+    return fallback;
+  }
+}
+
 // ─── Get Weakness Profile ───────────────────────────────────────────────────
 export const get = query({
   args: { userId: v.id("users") },
@@ -81,14 +90,12 @@ export const update = mutation({
         (existing.originalityAvg * n + (args.scores?.originality || 5)) /
         newN;
 
-      const oldW: string[] = JSON.parse(existing.commonWeaknesses || "[]");
+      const oldW = safeParse<string[]>(existing.commonWeaknesses, []);
       const newW = [
         ...new Set([...(args.weaknesses || []).slice(0, 3), ...oldW]),
       ].slice(0, 8);
 
-      const oldF: Record<string, number> = JSON.parse(
-        existing.fallacyHits || "{}"
-      );
+      const oldF = safeParse<Record<string, number>>(existing.fallacyHits, {});
       foundFallacies.forEach((f) => {
         oldF[f] = (oldF[f] || 0) + 1;
       });
@@ -118,9 +125,7 @@ export const recordFailedObjection = mutation({
       .unique();
     if (!existing) return;
 
-    const failures: Record<string, number> = JSON.parse(
-      existing.objectionFailures || "{}"
-    );
+    const failures = safeParse<Record<string, number>>(existing.objectionFailures, {});
     failures[args.objection] = (failures[args.objection] || 0) + 1;
 
     await ctx.db.patch(existing._id, {

@@ -192,7 +192,7 @@ export function useGym() {
         }
       } catch (_) {}
     } catch (e) {
-      setError('Failed to generate verdict.');
+      setError(e.message || 'Failed to generate verdict.');
       setPhase(PHASES.SPARRING);
     }
   }, [topic, stance, difficulty, claims, sideSwitch, mode, scenario, persona, model, auth, getVerdictAction, updateEloMutation, updateWeaknessAction]);
@@ -216,7 +216,7 @@ export function useGym() {
       setClaimsHp([MAX_CLAIM_HP, MAX_CLAIM_HP, MAX_CLAIM_HP]);
       setPhase(PHASES.CLAIMS_CONFIRM);
     } catch (e) {
-      setError('Failed to process your argument. Check your API connection.');
+      setError(e.message || 'Failed to process your argument. Check your API connection.');
       setPhase(PHASES.STATEMENT);
     }
   }, [statement, topic, stance, difficulty, mode, scenario, persona, model, extractClaimsAction]);
@@ -243,7 +243,7 @@ export function useGym() {
       setClaimsHp(newHp);
       if (newHp.every(hp => hp === 0)) fetchVerdict(updated);
     } catch (e) {
-      setError('AI failed to respond. Try again.');
+      setError(e.message || 'AI failed to respond. Try again.');
     }
     setLoading(false);
   }, [statement, topic, stance, difficulty, claims, mode, scenario, persona, fetchVerdict, argueStream]);

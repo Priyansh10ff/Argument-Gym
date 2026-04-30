@@ -45,6 +45,10 @@
 .lbBtn { background: transparent; border: 1px solid var(--gray-light); color: var(--text-dim); font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.1em; padding: 4px 10px; transition: all 0.15s; }
 .lbBtn:hover { border-color: var(--white); color: var(--white); }
 
+/* ── Guest Warning ────────────────────────────────────────────────────────── */
+.guestWarning { background: rgba(255, 193, 7, 0.08); border: 1px solid rgba(255, 193, 7, 0.2); color: #ffc107; padding: 10px 14px; font-size: 12px; font-family: var(--font-body); border-radius: 6px; margin-bottom: 2rem; display: flex; align-items: center; gap: 10px; }
+.guestWarning strong { font-weight: 600; color: #ffe082; }
+
 /* ── Mode selector ────────────────────────────────────────────────────────── */
 .modeRow { display: flex; gap: 6px; margin-bottom: 1.25rem; flex-wrap: wrap; }
 .modePill { flex: 1; min-width: 130px; background: var(--black); border: 1px solid var(--gray-light); color: var(--text-dim); padding: 8px 10px; font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em; transition: all 0.15s; white-space: nowrap; }
