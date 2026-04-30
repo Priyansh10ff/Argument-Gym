@@ -7,23 +7,43 @@ import { api } from '../../convex/_generated/api';
 export default function Profile({ onBack }) {
   const auth = useAuth();
   
-  // Always query userStats based on user ID
-  // For guests, auth.user might be null until convex syncs, so we use getUserByGuestId if needed
-  const guestUser = useQuery(api.users.getUserByGuestId, auth.isGuest ? { guestId: auth.getGuestId() } : "skip");
-  const currentUser = auth.isGuest ? guestUser : auth.user;
-  
+  const currentUser = auth.user;
   const userStats = useQuery(api.users.getUserStats, currentUser?._id ? { userId: currentUser._id } : "skip");
   const weaknessProfile = useQuery(api.weaknessProfiles.get, currentUser?._id ? { userId: currentUser._id } : "skip");
 
-  if (!currentUser || !userStats) {
+  // If auth is still initializing, show loading
+  if (auth.loading) {
     return (
       <div className={styles.wrap}>
-         <div className={styles.loading}>Loading profile...</div>
+         <div className={styles.loading}>Initializing session...</div>
       </div>
     );
   }
 
-  const { history, rank } = userStats;
+  // If we have a user but stats are still fetching
+  if (currentUser && userStats === undefined) {
+    return (
+      <div className={styles.wrap}>
+         <div className={styles.loading}>Loading player stats...</div>
+      </div>
+    );
+  }
+
+  // Final fallback if no user found after loading
+  if (!currentUser) {
+    return (
+      <div className={styles.wrap}>
+         <div className={styles.inner}>
+           <button className={styles.backBtn} onClick={onBack}>← BACK</button>
+           <div className={styles.loading}>No profile found. Try debating once to initialize!</div>
+         </div>
+      </div>
+    );
+  }
+
+  // At this point we have currentUser and (userStats or userStats === null)
+  const history = userStats?.history || [];
+  const rank = userStats?.rank || 0;
   const wp = weaknessProfile;
 
   const BADGES = {

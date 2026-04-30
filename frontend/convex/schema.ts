@@ -108,4 +108,10 @@ export default defineSchema({
     momentum: v.string(),
     keyInsight: v.string(),
   }).index("by_roomId", ["roomId"]),
+
+  // ─── Daily Topics ──────────────────────────────────────────────────────────
+  dailyTopics: defineTable({
+    date: v.string(), // "YYYY-MM-DD"
+    topic: v.string(),
+  }).index("by_date", ["date"]),
 });

@@ -22,6 +22,7 @@ const PERSONAS = [
   { id: 'enthusiastic_vp',label: 'Enthusiastic VP',   sub: 'Loves vision, no budget' },
   { id: 'technical_buyer', label: 'Technical Buyer',  sub: 'Interrogates every claim' },
   { id: 'procurement',    label: 'Procurement',       sub: 'Process-obsessed, risk-averse' },
+  { id: 'custom',         label: 'Custom Persona',     sub: 'Define your own opponent' },
 ];
 
 export default function Landing({ onStart }) {
@@ -32,8 +33,11 @@ export default function Landing({ onStart }) {
   const [model, setModel]       = useState('auto');
   const [scenario, setScenario] = useState('');
   const [persona, setPersona]   = useState('skeptical_cfo');
+  const [customPersona, setCustomPersona] = useState('');
   const [showLb, setShowLb]     = useState(false);
   const [tab, setTab]           = useState('global');
+
+  const dailyTopic = useQuery(api.daily.getDailyTopic);
 
   const auth = useAuth();
   const userStats = auth.user;
@@ -52,7 +56,15 @@ export default function Landing({ onStart }) {
   const handle = (t) => {
     const finalTopic = (t || topic).trim();
     if (!finalTopic) return;
-    onStart({ topic: finalTopic, stance, difficulty, mode, model, scenario, persona });
+    onStart({ 
+      topic: finalTopic, 
+      stance, 
+      difficulty, 
+      mode, 
+      model, 
+      scenario, 
+      persona: persona === 'custom' ? customPersona : persona 
+    });
   };
 
   return (
@@ -161,6 +173,28 @@ export default function Landing({ onStart }) {
                   </button>
                 ))}
               </div>
+              {persona === 'custom' && (
+                <input
+                  className={styles.input}
+                  style={{ marginTop: '0.75rem' }}
+                  placeholder="e.g. 18th Century Marxist, Pretentious Film Critic..."
+                  value={customPersona}
+                  onChange={e => setCustomPersona(e.target.value)}
+                />
+              )}
+            </div>
+          )}
+
+          {/* Daily Topic */}
+          {dailyTopic && (
+            <div className={styles.dailyChallenge}>
+               <div className={styles.dailyHeader}>
+                 <span className={styles.dailyBadge}>DAILY CHALLENGE</span>
+                 <span className={styles.dailyNew}>NEW TOPIC EVERY 24H</span>
+               </div>
+               <button className={styles.dailyTopicBtn} onClick={() => handle(dailyTopic)}>
+                 {dailyTopic}
+               </button>
             </div>
           )}
 

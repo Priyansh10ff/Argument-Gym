@@ -34,27 +34,41 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     if (convexAuthLoading) return;
 
-    const init = async () => {
-      if (!isAuthenticated) {
-        // Guest mode
+    // If we're authenticated with Google, we're not a guest
+    if (isAuthenticated) {
+      setIsGuest(false);
+      setLoading(false);
+      return;
+    }
+
+    // For guests, wait for the query to resolve
+    if (guestUser === undefined) return;
+
+    const initGuest = async () => {
+      if (guestUser === null) {
+        // Not in DB yet — create it
         try {
+          console.log('[auth] Creating new guest user...');
           const u = await getOrCreateUser({
             guestId: getGuestId(),
             name: localStorage.getItem('arg_gym_name') || 'Anonymous',
           });
-          setUser(u);
-          setIsGuest(true);
+          if (u) setUser(u);
         } catch (e) {
-          console.error('[auth] guest init failed:', e);
+          console.error('[auth] Mutation failed:', e);
         }
+      } else {
+        // Exists in DB
+        setUser(guestUser);
       }
+      setIsGuest(true);
       setLoading(false);
     };
 
-    init();
-  }, [convexAuthLoading, isAuthenticated]);
+    initGuest();
+  }, [convexAuthLoading, isAuthenticated, guestUser, getOrCreateUser]);
 
-  // ── Update user when guest query changes ───
+  // ── Update user when queries change ───
   useEffect(() => {
     if (guestUser && isGuest) {
       setUser(guestUser);
@@ -143,6 +157,7 @@ export function AuthProvider({ children }) {
     signOut: handleSignOut,
     updateName,
     getUserId: () => user?._id || null,
+    getGuestId: () => getGuestId(),
     getPlayerId: () => (isGuest ? getGuestId() : user?._id || getGuestId()),
     getPlayerName: () => user?.name || localStorage.getItem('arg_gym_name') || 'Anonymous',
   };

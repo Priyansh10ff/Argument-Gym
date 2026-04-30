@@ -264,3 +264,24 @@
 
 /* ── Streaming cursor ─────────────────────────────────────────────────────── */
 .streamCursor { color: var(--red); animation: blink 0.8s step-end infinite; margin-left: 1px; }
+
+/* ── Voice Controls ───────────────────────────────────────────────────────── */
+.voiceControls { display: flex; gap: 8px; margin-bottom: 8px; }
+.voiceBtn { background: var(--gray); border: 1px solid var(--gray-light); color: var(--text-dim); width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; transition: all 0.2s; }
+.voiceBtn:hover { border-color: var(--white); color: var(--white); }
+.voiceBtn.active { background: var(--red); color: var(--white); border-color: var(--red); box-shadow: 0 0 10px rgba(255, 59, 48, 0.3); }
+
+@keyframes blink { 50% { opacity: 0; } }
+@keyframes fadeUp { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
+
+/* ── Mobile Responsiveness ────────────────────────────────────────────────── */
+@media (max-width: 800px) {
+  .wrap { flex-direction: column; overflow-y: auto; }
+  .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid var(--gray-light); padding: 1rem; position: relative; }
+  .arena { height: auto; min-height: 500px; }
+  .roundNum { font-size: 38px; }
+  .claims { display: none; } /* Hide claims in sidebar on mobile to save space */
+  .scores { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .scoreRow { margin-bottom: 0; }
+  .scoreLabel { width: 40px; }
+}

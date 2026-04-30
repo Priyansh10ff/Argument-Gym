@@ -221,9 +221,17 @@ export function buildSystemPrompt(opts: {
     base = BASE_COURTROOM;
   } else if (opts.mode === "sales") {
     base = BASE_SALES;
-    const p =
-      SALES_PERSONAS[opts.persona] || SALES_PERSONAS.skeptical_cfo;
-    base += `\n\n=== YOUR BUYER PERSONA: ${p.name.toUpperCase()} ===\n${p.description}\nStyle: ${p.style}\nHot buttons (use these to object): ${p.hotButtons.join(", ")}`;
+    const p = SALES_PERSONAS[opts.persona];
+    if (p) {
+      base += `\n\n=== YOUR BUYER PERSONA: ${p.name.toUpperCase()} ===\n${p.description}\nStyle: ${p.style}\nHot buttons (use these to object): ${p.hotButtons.join(", ")}`;
+    } else if (opts.persona && opts.persona.trim()) {
+      // Custom persona
+      base += `\n\n=== YOUR CUSTOM BUYER PERSONA ===\nYou must act exactly as this specific persona: ${opts.persona}\nAdhere to their tone, worldview, and level of skepticism. Relentlessly raise objections that this persona would likely have.`;
+    } else {
+      // Fallback to default
+      const defaultP = SALES_PERSONAS.skeptical_cfo;
+      base += `\n\n=== YOUR BUYER PERSONA: ${defaultP.name.toUpperCase()} ===\n${defaultP.description}\nStyle: ${defaultP.style}\nHot buttons: ${defaultP.hotButtons.join(", ")}`;
+    }
   } else {
     base = BASE_STANDARD;
   }

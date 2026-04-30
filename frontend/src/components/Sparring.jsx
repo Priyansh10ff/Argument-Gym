@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styles from './Sparring.module.css';
 import HealthBar from './HealthBar';
 import { SCORE_LABELS, AI_LABEL } from '../hooks/useGym';
@@ -22,6 +22,8 @@ export default function Sparring({
   onSubmit, onEndEarly, sideSwitch, mode,
   streamingText
 }) {
+  const [isListening, setIsListening] = useState(false);
+  const [ttsEnabled, setTtsEnabled] = useState(false);
   const bottomRef = useRef(null);
   const inputRef  = useRef(null);
   const labels    = SCORE_LABELS[mode] || SCORE_LABELS.standard;
@@ -32,6 +34,34 @@ export default function Sparring({
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
     if (!loading) inputRef.current?.focus();
   }, [rounds, loading]);
+
+  // Speech Recognition (STT)
+  const toggleSpeech = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) return alert('Speech recognition not supported in this browser');
+    
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.onstart = () => setIsListening(true);
+    recognition.onend = () => setIsListening(false);
+    recognition.onresult = (e) => {
+      const transcript = e.results[0][0].transcript;
+      setUserInput(prev => prev ? prev + ' ' + transcript : transcript);
+    };
+    recognition.start();
+  };
+
+  // Text to Speech (TTS)
+  useEffect(() => {
+    if (ttsEnabled && streamingText === '' && rounds.length > 0) {
+      const last = rounds[rounds.length - 1];
+      if (last.aiArg) {
+         window.speechSynthesis.cancel();
+         const utter = new SpeechSynthesisUtterance(last.aiArg);
+         window.speechSynthesis.speak(utter);
+      }
+    }
+  }, [rounds, ttsEnabled, streamingText]);
 
   const handleKey = (e) => {
     if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) onSubmit();
@@ -166,6 +196,22 @@ export default function Sparring({
         </div>
 
         <div className={styles.inputArea}>
+          <div className={styles.voiceControls}>
+             <button 
+               className={`${styles.voiceBtn} ${isListening ? styles.active : ''}`} 
+               onClick={toggleSpeech}
+               title="Dictate Argument"
+             >
+               {isListening ? '🛑' : '🎙️'}
+             </button>
+             <button 
+               className={`${styles.voiceBtn} ${ttsEnabled ? styles.active : ''}`} 
+               onClick={() => setTtsEnabled(!ttsEnabled)}
+               title="Toggle AI Voice"
+             >
+               {ttsEnabled ? '🔊' : '🔇'}
+             </button>
+          </div>
           {lastRound && (
             <p className={styles.inputHint}>
               Respond to: <em>{lastRound.aiArg?.split('?')[0]?.slice(-80)}?</em>

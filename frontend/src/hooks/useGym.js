@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
-import { useAction, useMutation } from 'convex/react';
+import { useAction, useMutation, useQuery } from 'convex/react';
 import { api } from '../../convex/_generated/api';
 import { useAuth } from '../lib/auth';
 import { streamArgue, parseSSEStream } from '../lib/api';
@@ -89,6 +89,10 @@ export function useGym() {
     auth = null;
   }
 
+  const weaknessProfile = useQuery(api.weaknessProfiles.get, 
+    auth?.user?._id && !auth.isGuest ? { userId: auth.user._id } : "skip"
+  );
+
   const updateRunningScores = (roundsArr) => {
     if (!roundsArr.length) return;
     const avg = (key) => Math.round(
@@ -111,6 +115,7 @@ export function useGym() {
         scenario: currentScenario || scenario,
         persona: currentPersona || persona,
         model,
+        weaknessProfile: weaknessProfile || null,
       });
 
       let finalData = null;
@@ -142,9 +147,10 @@ export function useGym() {
         scenario: currentScenario || scenario,
         persona: currentPersona || persona,
         model,
+        weaknessProfile: weaknessProfile || null,
       });
     }
-  }, [topic, stance, difficulty, claims, mode, scenario, persona, model, argueAction]);
+  }, [topic, stance, difficulty, claims, mode, scenario, persona, model, argueAction, weaknessProfile]);
 
   const fetchVerdict = useCallback(async (msgs) => {
     const finalMsgs = msgs || messagesRef.current;

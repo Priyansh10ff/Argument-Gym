@@ -81,6 +81,16 @@ export const getOrCreateUser = mutation({
   },
 });
 
+export const getUserByGuestId = query({
+  args: { guestId: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("users")
+      .withIndex("by_guestId", (q) => q.eq("guestId", args.guestId))
+      .unique();
+  },
+});
+
 // ─── Get User Stats ─────────────────────────────────────────────────────────
 export const getUserStats = query({
   args: { userId: v.id("users") },
@@ -94,22 +104,14 @@ export const getUserStats = query({
       .order("desc")
       .take(20);
 
-    // Calculate rank
-    const allUsers = await ctx.db.query("users").collect();
-    const rank = allUsers.filter((u) => u.elo > user.elo).length + 1;
+    // Calculate rank - count users with higher ELO
+    const betterUsers = await ctx.db
+      .query("users")
+      .withIndex("by_elo", (q) => q.gt("elo", user.elo))
+      .collect();
+    const rank = betterUsers.length + 1;
 
     return { ...user, history, rank };
-  },
-});
-
-// ─── Get User by Guest ID ───────────────────────────────────────────────────
-export const getUserByGuestId = query({
-  args: { guestId: v.string() },
-  handler: async (ctx, args) => {
-    return await ctx.db
-      .query("users")
-      .withIndex("by_guestId", (q) => q.eq("guestId", args.guestId))
-      .unique();
   },
 });
 
