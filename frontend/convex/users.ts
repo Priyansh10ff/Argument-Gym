@@ -44,6 +44,7 @@ export const getOrCreateUser = mutation({
         streak: 0,
         bestStreak: 0,
         totalDebates: 0,
+        achievements: [],
       });
       return await ctx.db.get(id);
     }
@@ -71,6 +72,7 @@ export const getOrCreateUser = mutation({
         streak: 0,
         bestStreak: 0,
         totalDebates: 0,
+        achievements: [],
       });
       return await ctx.db.get(id);
     }
@@ -125,6 +127,7 @@ export const updateElo = mutation({
     ),
     topic: v.string(),
     mode: v.string(),
+    transcript: v.optional(v.any()),
   },
   handler: async (ctx, args) => {
     const user = await ctx.db.get(args.userId);
@@ -144,6 +147,20 @@ export const updateElo = mutation({
     const newDraws = user.draws + (args.verdict === "Draw" ? 1 : 0);
     const newStreak = args.verdict === "Won" ? user.streak + 1 : 0;
     const newBest = Math.max(user.bestStreak, newStreak);
+    const totalDebates = user.totalDebates + 1;
+
+    const currentAchievements = user.achievements || [];
+    const newAchievements = [...currentAchievements];
+
+    if (!newAchievements.includes("Flawless Victory") && args.scores?.logic === 10 && args.verdict === "Won") {
+      newAchievements.push("Flawless Victory");
+    }
+    if (!newAchievements.includes("Unstoppable") && newStreak >= 10) {
+      newAchievements.push("Unstoppable");
+    }
+    if (!newAchievements.includes("Veteran") && totalDebates >= 10) {
+      newAchievements.push("Veteran");
+    }
 
     await ctx.db.patch(args.userId, {
       elo: newElo,
@@ -152,11 +169,12 @@ export const updateElo = mutation({
       draws: newDraws,
       streak: newStreak,
       bestStreak: newBest,
-      totalDebates: user.totalDebates + 1,
+      totalDebates,
+      achievements: newAchievements,
     });
 
     const today = new Date().toISOString().slice(0, 10);
-    await ctx.db.insert("debates", {
+    const debateId = await ctx.db.insert("debates", {
       userId: args.userId,
       date: today,
       eloDelta: delta,
@@ -166,9 +184,10 @@ export const updateElo = mutation({
       logicScore: args.scores?.logic || 0,
       evidenceScore: args.scores?.evidence || 0,
       originalityScore: args.scores?.originality || 0,
+      transcript: args.transcript,
     });
 
-    return { delta, newElo, newStreak };
+    return { delta, newElo, newStreak, debateId: debateId };
   },
 });
 

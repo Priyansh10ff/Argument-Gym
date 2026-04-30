@@ -26,6 +26,13 @@ export default function Profile({ onBack }) {
   const { history, rank } = userStats;
   const wp = weaknessProfile;
 
+  const BADGES = {
+    "Flawless Victory": { icon: "🏅", desc: "Win a debate with 10/10 Logic score" },
+    "Unstoppable": { icon: "🔥", desc: "Reach a 10-win streak" },
+    "Veteran": { icon: "🛡️", desc: "Complete 10 debates" },
+  };
+  const achievements = currentUser.achievements || [];
+
   const parseJSON = (str, fallback) => {
     try {
       return str ? JSON.parse(str) : fallback;
@@ -36,6 +43,11 @@ export default function Profile({ onBack }) {
 
   const commonW = wp ? parseJSON(wp.commonWeaknesses, []) : [];
   const fallacyH = wp ? parseJSON(wp.fallacyHits, {}) : {};
+
+  const handleCopyReplay = (id) => {
+    const url = `${window.location.origin}/?replay=${id}`;
+    navigator.clipboard.writeText(url).then(() => alert('Replay link copied!'));
+  };
 
   return (
     <div className={styles.wrap}>
@@ -120,6 +132,25 @@ export default function Profile({ onBack }) {
                )}
             </div>
 
+            {/* Achievements Card */}
+            <div className={`${styles.card} ${styles.fullWidth}`}>
+               <h2 className={styles.cardTitle}>ACHIEVEMENTS</h2>
+               <div className={styles.achievementsGrid}>
+                 {Object.entries(BADGES).map(([key, info]) => {
+                   const unlocked = achievements.includes(key);
+                   return (
+                     <div key={key} className={`${styles.badgeItem} ${unlocked ? styles.badgeUnlocked : styles.badgeLocked}`}>
+                       <div className={styles.badgeIcon}>{info.icon}</div>
+                       <div className={styles.badgeInfo}>
+                         <div className={styles.badgeName}>{key}</div>
+                         <div className={styles.badgeDesc}>{info.desc}</div>
+                       </div>
+                     </div>
+                   );
+                 })}
+               </div>
+            </div>
+
             {/* History Card */}
             <div className={`${styles.card} ${styles.fullWidth}`}>
                <h2 className={styles.cardTitle}>RECENT MATCHES</h2>
@@ -132,6 +163,7 @@ export default function Profile({ onBack }) {
                          <span className={styles.historyTopic}>{match.topic}</span>
                        </div>
                        <div className={styles.historyRight}>
+                         <button className={styles.copyLinkBtn} onClick={() => handleCopyReplay(match._id)}>🔗 Share</button>
                          <span className={styles.historyMode}>{match.mode}</span>
                          <span className={match.eloDelta >= 0 ? styles.deltaPos : styles.deltaNeg}>
                            {match.eloDelta > 0 ? '+' : ''}{match.eloDelta}

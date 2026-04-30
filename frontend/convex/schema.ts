@@ -23,6 +23,7 @@ export default defineSchema({
     streak: v.number(),
     bestStreak: v.number(),
     totalDebates: v.number(),
+    achievements: v.optional(v.array(v.string())),
   })
     .index("by_guestId", ["guestId"])
     .index("by_tokenIdentifier", ["tokenIdentifier"])
@@ -39,6 +40,7 @@ export default defineSchema({
     logicScore: v.number(),
     evidenceScore: v.number(),
     originalityScore: v.number(),
+    transcript: v.optional(v.any()), // Array of {role, content}
   })
     .index("by_userId", ["userId"])
     .index("by_userId_date", ["userId", "date"])

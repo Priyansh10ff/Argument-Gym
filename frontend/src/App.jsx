@@ -13,6 +13,7 @@ import HvHSparring from './components/HvHSparring';
 import PublicLobby from './components/PublicLobby';
 import SpectatorView from './components/SpectatorView';
 import Profile     from './components/Profile';
+import Replay      from './components/Replay';
 import { getUserName } from './lib/identity';
 
 export default function App() {
@@ -23,12 +24,19 @@ export default function App() {
   const [lobbyMode, setLobbyMode]   = useState(false);
   const [profileMode, setProfileMode] = useState(false);
   const [spectating, setSpectating] = useState(null);   // { roomId, roomCode }
+  const [replayId, setReplayId]     = useState(null);
 
-  // Handle ?join=XXXX query param on page load
+  // Handle ?join=XXXX or ?replay=XXXX query param on page load
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const joinCode = params.get('join');
-    if (joinCode && joinCode.length === 8) {
+    const repId = params.get('replay');
+
+    if (repId) {
+      setShowMarketing(false);
+      setReplayId(repId);
+      window.history.replaceState({}, '', window.location.pathname);
+    } else if (joinCode && joinCode.length === 8) {
       setShowMarketing(false);
       setHvhMode('room');
       setHvhData({
@@ -36,14 +44,17 @@ export default function App() {
         userId: localStorage.getItem('arg_gym_uid') || crypto.randomUUID(),
         name: getUserName() || 'Anonymous',
       });
-      // Clean URL
       window.history.replaceState({}, '', window.location.pathname);
     }
   }, []);
 
   // ─── Marketing page ───
-  if (showMarketing && gym.phase === PHASES.LANDING && !hvhMode && !lobbyMode && !profileMode && !spectating) {
+  if (showMarketing && gym.phase === PHASES.LANDING && !hvhMode && !lobbyMode && !profileMode && !spectating && !replayId) {
     return <MarketingPage onEnter={() => setShowMarketing(false)} />;
+  }
+  // ─── Replay ───
+  if (replayId) {
+    return <Replay debateId={replayId} onBack={() => setReplayId(null)} />;
   }
 
   // ─── Public Lobby ───

@@ -249,6 +249,53 @@
   font-style: italic;
 }
 
+/* ── Achievements ────────────────────────────────────────────────────────── */
+.achievementsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+.badgeItem {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 6px;
+  background: var(--black);
+  border: 1px solid var(--gray-mid);
+  transition: all 0.2s;
+}
+.badgeUnlocked {
+  border-color: rgba(255, 193, 7, 0.4);
+  box-shadow: 0 0 15px rgba(255, 193, 7, 0.05);
+}
+.badgeLocked {
+  opacity: 0.3;
+  filter: grayscale(100%);
+}
+.badgeIcon {
+  font-size: 24px;
+}
+.badgeInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.badgeName {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--white);
+  letter-spacing: 0.1em;
+}
+.badgeUnlocked .badgeName {
+  color: var(--yellow);
+}
+.badgeDesc {
+  font-size: 11px;
+  color: var(--text-dim);
+  line-height: 1.4;
+}
+
 /* ── History ─────────────────────────────────────────────────────────────── */
 .historyList {
   display: flex;
@@ -304,6 +351,8 @@
 }
 .deltaPos { color: #4CAF50; font-family: var(--font-mono); font-size: 14px; width: 40px; text-align: right; }
 .deltaNeg { color: var(--red); font-family: var(--font-mono); font-size: 14px; width: 40px; text-align: right; }
+.copyLinkBtn { background: transparent; border: 1px solid var(--gray-mid); color: var(--text-dim); border-radius: 4px; padding: 4px 8px; font-family: var(--font-mono); font-size: 10px; cursor: pointer; transition: all 0.2s; }
+.copyLinkBtn:hover { color: var(--white); border-color: var(--white); }
 
 /* ── Actions ─────────────────────────────────────────────────────────────── */
 .actions {

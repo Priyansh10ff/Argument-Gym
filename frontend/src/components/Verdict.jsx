@@ -33,6 +33,12 @@ export default function Verdict({ verdict, topic, stance, sideSwitch, onReset, e
     navigator.clipboard.writeText(text).then(() => alert('Score card copied!'));
   };
 
+  const handleCopyReplay = () => {
+    if (!eloResult?.debateId) return;
+    const url = `${window.location.origin}/?replay=${eloResult.debateId}`;
+    navigator.clipboard.writeText(url).then(() => alert('Replay link copied!'));
+  };
+
   return (
     <div className={styles.wrap}>
       <div className={styles.inner}>
@@ -103,6 +109,9 @@ export default function Verdict({ verdict, topic, stance, sideSwitch, onReset, e
         </div>
 
         <div className={styles.actions}>
+          {eloResult?.debateId && (
+            <button className={styles.shareBtn} onClick={handleCopyReplay}>COPY REPLAY LINK</button>
+          )}
           <button className={styles.shareBtn} onClick={handleCopy}>COPY SCORE CARD</button>
           <button className={styles.resetBtn} onClick={onReset}>FIGHT AGAIN →</button>
         </div>

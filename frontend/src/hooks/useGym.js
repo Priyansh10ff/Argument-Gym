@@ -169,6 +169,7 @@ export function useGym() {
               originality: data.scores.originality || 0,
             } : undefined,
             topic, mode,
+            transcript: finalMsgs,
           });
           setEloResult(elo);
 
