@@ -21,7 +21,7 @@ export default function Profile({ onBack }) {
   }
 
   // If we have a user but stats are still fetching
-  if (currentUser && userStats === undefined) {
+  if (currentUser && currentUser._id && userStats === undefined) {
     return (
       <div className={styles.wrap}>
          <div className={styles.loading}>Loading player stats...</div>
@@ -30,7 +30,7 @@ export default function Profile({ onBack }) {
   }
 
   // Final fallback if no user found after loading
-  if (!currentUser) {
+  if (!currentUser || !currentUser._id) {
     return (
       <div className={styles.wrap}>
          <div className={styles.inner}>

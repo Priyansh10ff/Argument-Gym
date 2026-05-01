@@ -36,9 +36,11 @@ export default function Sparring({
   }, [rounds, loading]);
 
   // Speech Recognition (STT)
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const hasSpeechSupport = !!SpeechRecognition;
+
   const toggleSpeech = () => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) return alert('Speech recognition not supported in this browser');
+    if (!hasSpeechSupport) return alert('Speech recognition not supported in this browser');
     
     const recognition = new SpeechRecognition();
     recognition.lang = 'en-US';
@@ -197,13 +199,15 @@ export default function Sparring({
 
         <div className={styles.inputArea}>
           <div className={styles.voiceControls}>
-             <button 
-               className={`${styles.voiceBtn} ${isListening ? styles.active : ''}`} 
-               onClick={toggleSpeech}
-               title="Dictate Argument"
-             >
-               {isListening ? '🛑' : '🎙️'}
-             </button>
+             {hasSpeechSupport && (
+               <button 
+                 className={`${styles.voiceBtn} ${isListening ? styles.active : ''}`} 
+                 onClick={toggleSpeech}
+                 title="Dictate Argument"
+               >
+                 {isListening ? '🛑' : '🎙️'}
+               </button>
+             )}
              <button 
                className={`${styles.voiceBtn} ${ttsEnabled ? styles.active : ''}`} 
                onClick={() => setTtsEnabled(!ttsEnabled)}

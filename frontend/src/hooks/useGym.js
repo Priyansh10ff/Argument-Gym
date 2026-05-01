@@ -90,7 +90,7 @@ export function useGym() {
   }
 
   const weaknessProfile = useQuery(api.weaknessProfiles.get, 
-    auth?.user?._id && !auth.isGuest ? { userId: auth.user._id } : "skip"
+    auth?.user?._id ? { userId: auth.user._id } : "skip"
   );
 
   const updateRunningScores = (roundsArr) => {
@@ -165,7 +165,7 @@ export function useGym() {
 
       // Update ELO
       try {
-        if (auth?.user?._id && !auth.isGuest) {
+        if (auth?.user?._id) {
           const elo = await updateEloMutation({
             userId: auth.user._id,
             verdict: data.verdict,
@@ -193,7 +193,7 @@ export function useGym() {
             });
           } catch (_) {}
         } else {
-          // Local ELO for guests
+          // Local ELO fallback if no user id
           const elo = updateLocalElo(data.verdict, mode);
           setEloResult(elo);
         }
