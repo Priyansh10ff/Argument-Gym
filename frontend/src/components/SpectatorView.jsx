@@ -11,8 +11,13 @@ export default function SpectatorView({ roomId, onBack }) {
   const removeSpectator = useMutation(api.rooms.removeSpectator);
 
   useEffect(() => {
-    addSpectator({ roomId });
-    return () => { removeSpectator({ roomId }); };
+    // Use stable roomId ref so cleanup always fires with correct value
+    const rid = roomId;
+    addSpectator({ roomId: rid });
+    return () => {
+      removeSpectator({ roomId: rid }).catch(() => {});
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [roomId]);
 
   const last = analyses[analyses.length - 1];

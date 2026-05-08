@@ -48,6 +48,7 @@ export function AuthProvider({ children }) {
       if (guestUser === null) {
         // Not in DB yet — create it
         try {
+          console.log('[auth] Creating new guest user...');
           const u = await getOrCreateUser({
             guestId: getGuestId(),
             name: localStorage.getItem('arg_gym_name') || 'Anonymous',

@@ -414,3 +414,30 @@
   0% { opacity: 0; transform: translateY(10px); }
   100% { opacity: 1; transform: translateY(0); }
 }
+
+/* ── Streak banner ────────────────────────────────────────────────────────── */
+.streakBanner {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: #1a0800;
+  border: 1px solid #5a2010;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  animation: fadeUp 0.4s ease both;
+}
+.streakFire { font-size: 2rem; flex-shrink: 0; }
+.streakTitle {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  letter-spacing: 0.06em;
+  color: var(--red);
+  margin: 0;
+}
+.streakSub {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  margin-top: 3px;
+}

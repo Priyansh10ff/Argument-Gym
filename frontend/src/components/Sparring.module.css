@@ -285,3 +285,39 @@
   .scoreRow { margin-bottom: 0; }
   .scoreLabel { width: 40px; }
 }
+
+/* ── Score bar pulse on update ─────────────────────────────────────────────── */
+@keyframes scorePulse {
+  0%   { opacity: 1; }
+  30%  { opacity: 0.3; }
+  100% { opacity: 1; }
+}
+.barFillPulse { animation: scorePulse 0.6s ease; }
+
+/* ── Streaming bubble — starts minimal, grows with content ─────────────────── */
+.streamBubble {
+  background: #0f0a0a;
+  border: 1px solid var(--gray-mid);
+  padding: 10px 14px;
+  min-height: 0;
+  transition: min-height 0.3s ease;
+}
+.cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: var(--red);
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: blink 0.8s infinite;
+}
+
+/* ── Difficulty tooltip ────────────────────────────────────────────────────── */
+.diffTooltip {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-dim);
+  margin-top: 5px;
+  letter-spacing: 0.04em;
+  line-height: 1.4;
+}

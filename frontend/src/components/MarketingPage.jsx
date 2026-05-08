@@ -38,11 +38,9 @@ export default function MarketingPage({ onEnter }) {
   const auth = useAuth();
 
   const handleEnterClick = () => {
-    if (auth.isGuest) {
-      setShowAuthModal(true);
-    } else {
-      onEnter();
-    }
+    // Never gate entry behind auth — guests can enter immediately
+    // Auth can be initiated from the Landing page or Profile
+    onEnter();
   };
 
   return (
@@ -82,6 +80,27 @@ export default function MarketingPage({ onEnter }) {
             An AI that fights back. Scores your logic. Remembers your weaknesses.<br />
             Gets harder to beat the better you get.
           </p>
+          {/* Live debate demo — shows the health bar mechanic */}
+          <div className={styles.demoSnippet}>
+            <div className={styles.demoBar}>
+              <span className={styles.demoClaim}>🔴 "AI cannot replicate human creativity"</span>
+              <div className={styles.demoHpRow}>
+                <span className={styles.demoHpFull} />
+                <span className={styles.demoHpFull} />
+                <span className={styles.demoHpEmpty} />
+              </div>
+            </div>
+            <div className={styles.demoBar}>
+              <span className={styles.demoClaim}>🔴 "Creativity requires lived experience"</span>
+              <div className={styles.demoHpRow}>
+                <span className={styles.demoHpFull} />
+                <span className={styles.demoHpEmpty} />
+                <span className={styles.demoHpEmpty} />
+              </div>
+            </div>
+            <div className={styles.demoMsg}>⚠ 2 claims under attack — defend them</div>
+          </div>
+
           <div className={styles.heroCtas}>
             <button className={styles.ctaPrimary} onClick={handleEnterClick}>
               ENTER THE GYM →

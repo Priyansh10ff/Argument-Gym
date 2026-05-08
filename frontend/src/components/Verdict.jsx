@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import styles from './Verdict.module.css';
 import { SCORE_LABELS } from '../hooks/useGym';
 
@@ -23,76 +23,112 @@ function ScoreRing({ value, label, color }) {
   );
 }
 
-export default function Verdict({ verdict, topic, stance, sideSwitch, onReset, eloResult, mode }) {
+export default function Verdict({ verdict, topic, stance, claims, eloResult, onRestart, mode }) {
   const labels = SCORE_LABELS[mode] || SCORE_LABELS.standard;
-  const verdictColor = verdict.verdict === 'Won' ? '#4CAF50' : verdict.verdict === 'Lost' ? 'var(--red)' : 'var(--yellow)';
-  const verdictMsg   = verdict.verdict === 'Won' ? 'YOU WON' : verdict.verdict === 'Lost' ? 'YOU LOST' : 'DRAW';
+  const [copied, setCopied] = useState(false);
+  const cardRef = useRef(null);
+
+  const verdictColor = verdict.verdict === 'Won' ? '#4CAF50'
+    : verdict.verdict === 'Lost' ? 'var(--red)' : 'var(--yellow)';
+  const verdictMsg = verdict.verdict === 'Won' ? 'YOU WON'
+    : verdict.verdict === 'Lost' ? 'YOU LOST' : 'DRAW';
 
   const handleCopy = () => {
-    const text = `Argument Gym Results\n\nTopic: ${topic}\nVerdict: ${verdictMsg}\nClarity: ${verdict.clarityScore}/100\n\n${labels.logic}: ${verdict.scores.logic} | ${labels.evidence}: ${verdict.scores.evidence} | ${labels.originality}: ${verdict.scores.originality}\n\n"${verdict.overallFeedback}"\n\nargumentgym.app`;
-    navigator.clipboard.writeText(text).then(() => alert('Score card copied!'));
-  };
+    const claimLines = (verdict.claimResults || [])
+      .map(cr => `  ${cr.survived ? '✓' : '✗'} ${cr.claim}`)
+      .join('\n');
+    const text = [
+      '🥊 ARGUMENT GYM — DEBATE RESULT',
+      '',
+      `Topic: ${topic}`,
+      `Stance: ${stance.toUpperCase()}`,
+      `Mode: ${mode.toUpperCase()}`,
+      `Verdict: ${verdictMsg}`,
+      '',
+      `${labels.logic}: ${verdict.scores?.logic ?? '–'}/100`,
+      `${labels.evidence}: ${verdict.scores?.evidence ?? '–'}/100`,
+      `${labels.originality}: ${verdict.scores?.originality ?? '–'}/100`,
+      `Clarity: ${verdict.clarityScore ?? '–'}/100`,
+      '',
+      'CLAIMS:',
+      claimLines,
+      '',
+      `"${verdict.overallFeedback}"`,
+      '',
+      `argumentgym.app`,
+    ].join('\n');
 
-  const handleCopyReplay = () => {
-    if (!eloResult?.debateId) return;
-    const url = `${window.location.origin}/?replay=${eloResult.debateId}`;
-    navigator.clipboard.writeText(url).then(() => alert('Replay link copied!'));
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
   };
 
   return (
     <div className={styles.wrap}>
       <div className={styles.inner}>
 
+        {/* Verdict banner */}
         <div className={styles.verdictBanner} style={{ borderColor: verdictColor }}>
           <span className={styles.verdictLabel} style={{ color: verdictColor }}>{verdictMsg}</span>
-          <span className={styles.clarityScore}>{verdict.clarityScore}</span>
+          <span className={styles.clarityScore}>{verdict.clarityScore ?? '–'}</span>
           <span className={styles.clarityLabel}>CLARITY SCORE</span>
         </div>
 
-        {/* ── Feature 3: ELO delta ── */}
+        {/* ELO delta */}
         {eloResult && (
           <div className={`${styles.eloDelta} ${eloResult.delta >= 0 ? styles.eloUp : styles.eloDown}`}>
             <span className={styles.eloIcon}>{eloResult.delta >= 0 ? '↑' : '↓'}</span>
             <span className={styles.eloChange}>
               {eloResult.delta >= 0 ? '+' : ''}{eloResult.delta} ELO
             </span>
-            <span className={styles.eloNew}>New rating: <strong>{eloResult.newElo}</strong></span>
-            {eloResult.newStreak > 1 && (
+            <span className={styles.eloNew}>
+              New rating: <strong>{eloResult.newElo}</strong>
+            </span>
+            {(eloResult.newStreak || 0) > 1 && (
               <span className={styles.eloStreak}>🔥 {eloResult.newStreak} STREAK</span>
             )}
           </div>
         )}
 
+        {/* Score rings */}
         <div className={styles.ringRow}>
-          <ScoreRing value={verdict.scores.logic}       label={labels.logic}       color="var(--red)" />
-          <ScoreRing value={verdict.scores.evidence}    label={labels.evidence}    color="#1D9E75" />
-          <ScoreRing value={verdict.scores.originality} label={labels.originality} color="var(--yellow)" />
-          {sideSwitch && <ScoreRing value={verdict.scores.perspective} label="PERSPECTIVE" color="#7F77DD" />}
+          <ScoreRing value={verdict.scores?.logic ?? 0}       label={labels.logic}       color="var(--red)" />
+          <ScoreRing value={verdict.scores?.evidence ?? 0}    label={labels.evidence}    color="#1D9E75" />
+          <ScoreRing value={verdict.scores?.originality ?? 0} label={labels.originality} color="var(--yellow)" />
+          {verdict.scores?.perspective != null && (
+            <ScoreRing value={verdict.scores.perspective} label="PERSPECTIVE" color="#7F77DD" />
+          )}
         </div>
 
+        {/* Judge's assessment */}
         <div className={styles.feedback}>
           <p className={styles.feedbackLabel}>JUDGE'S ASSESSMENT</p>
           <p className={styles.feedbackText}>"{verdict.overallFeedback}"</p>
         </div>
 
-        <div className={styles.claimsGrid}>
-          <p className={styles.sectionLabel}>CLAIM RESULTS</p>
-          {verdict.claimResults?.map((cr, i) => (
-            <div key={i} className={`${styles.claimResult} ${cr.survived ? styles.survived : styles.fell}`}>
-              <div className={styles.claimResultHeader}>
-                <span className={styles.claimResultIcon}>{cr.survived ? '✓' : '✗'}</span>
-                <span className={styles.claimResultStatus}>{cr.survived ? 'SURVIVED' : 'COLLAPSED'}</span>
+        {/* Claim results */}
+        {verdict.claimResults?.length > 0 && (
+          <div className={styles.claimsSection}>
+            <p className={styles.sectionLabel}>CLAIM RESULTS</p>
+            {verdict.claimResults.map((cr, i) => (
+              <div key={i} className={`${styles.claimResult} ${cr.survived ? styles.survived : styles.fell}`}>
+                <div className={styles.claimResultHeader}>
+                  <span className={styles.claimResultIcon}>{cr.survived ? '✓' : '✗'}</span>
+                  <span className={styles.claimResultStatus}>{cr.survived ? 'SURVIVED' : 'COLLAPSED'}</span>
+                </div>
+                <p className={styles.claimResultText}>{cr.claim}</p>
+                <p className={styles.claimResultNote}>{cr.note}</p>
               </div>
-              <p className={styles.claimResultText}>{cr.claim}</p>
-              <p className={styles.claimResultNote}>{cr.note}</p>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
+        {/* Strengths & weaknesses */}
         <div className={styles.swGrid}>
           <div className={styles.swCard}>
             <p className={styles.swTitle}>STRENGTHS</p>
-            {verdict.strengths?.map((s, i) => (
+            {(verdict.strengths || []).map((s, i) => (
               <div key={i} className={`${styles.swItem} ${styles.strength}`}>
                 <span className={styles.swIcon}>+</span><span>{s}</span>
               </div>
@@ -100,7 +136,7 @@ export default function Verdict({ verdict, topic, stance, sideSwitch, onReset, e
           </div>
           <div className={styles.swCard}>
             <p className={styles.swTitle}>WEAKNESSES</p>
-            {verdict.weaknesses?.map((w, i) => (
+            {(verdict.weaknesses || []).map((w, i) => (
               <div key={i} className={`${styles.swItem} ${styles.weakness}`}>
                 <span className={styles.swIcon}>−</span><span>{w}</span>
               </div>
@@ -108,13 +144,14 @@ export default function Verdict({ verdict, topic, stance, sideSwitch, onReset, e
           </div>
         </div>
 
+        {/* Actions */}
         <div className={styles.actions}>
-          {eloResult?.debateId && (
-            <button className={styles.shareBtn} onClick={handleCopyReplay}>COPY REPLAY LINK</button>
-          )}
-          <button className={styles.shareBtn} onClick={handleCopy}>COPY SCORE CARD</button>
-          <button className={styles.resetBtn} onClick={onReset}>FIGHT AGAIN →</button>
+          <button className={styles.copyBtn} onClick={handleCopy}>
+            {copied ? '✓ COPIED' : 'COPY SCORE CARD'}
+          </button>
+          <button className={styles.resetBtn} onClick={onRestart}>FIGHT AGAIN →</button>
         </div>
+
       </div>
     </div>
   );

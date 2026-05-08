@@ -2,7 +2,7 @@
 
 import { action } from "./_generated/server";
 import { v } from "convex/values";
-import { buildSystemPrompt, HVH_MONITOR_PROMPT, SALES_PERSONAS } from "./prompts";
+import { buildSystemPrompt, resolveModel, HVH_MONITOR_PROMPT, SALES_PERSONAS } from "./prompts";
 import OpenAI from "openai";
 
 // ─── Model routing ────────────────────────────────────────────────────────────

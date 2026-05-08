@@ -21,7 +21,7 @@ export default function Profile({ onBack }) {
   }
 
   // If we have a user but stats are still fetching
-  if (currentUser && currentUser._id && userStats === undefined) {
+  if (currentUser && userStats === undefined) {
     return (
       <div className={styles.wrap}>
          <div className={styles.loading}>Loading player stats...</div>
@@ -30,7 +30,7 @@ export default function Profile({ onBack }) {
   }
 
   // Final fallback if no user found after loading
-  if (!currentUser || !currentUser._id) {
+  if (!currentUser) {
     return (
       <div className={styles.wrap}>
          <div className={styles.inner}>
@@ -84,6 +84,17 @@ export default function Profile({ onBack }) {
                </span>
             </div>
          </div>
+
+         {/* Streak banner — shown when streak > 1 */}
+         {(currentUser.streak > 1) && (
+           <div className={styles.streakBanner}>
+             <span className={styles.streakFire}>🔥</span>
+             <div>
+               <p className={styles.streakTitle}>{currentUser.streak}-WIN STREAK</p>
+               <p className={styles.streakSub}>Personal best: {currentUser.bestStreak} wins in a row</p>
+             </div>
+           </div>
+         )}
 
          <div className={styles.grid}>
             {/* Stats Card */}

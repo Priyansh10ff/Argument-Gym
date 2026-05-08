@@ -2,7 +2,7 @@ import { httpRouter } from "convex/server";
 import { auth } from "./auth";
 import { httpAction } from "./_generated/server";
 import OpenAI from "openai";
-import { buildSystemPrompt } from "./prompts";
+import { buildSystemPrompt, resolveModel } from "./prompts";
 
 const http = httpRouter();
 

@@ -1,4 +1,4 @@
-import { query, mutation } from "./_generated/server";
+import { query, mutation, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 
 // ─── Create Room ────────────────────────────────────────────────────────────
@@ -244,5 +244,28 @@ export const getMessageCount = query({
       .withIndex("by_roomId", (q) => q.eq("roomId", args.roomId))
       .collect();
     return msgs.length;
+  },
+});
+
+// ─── Scheduled: abandon rooms older than 3 hours ────────────────────────────
+export const abandonExpiredRooms = internalMutation({
+  handler: async (ctx) => {
+    const cutoff = Date.now() - 3 * 60 * 60 * 1000; // 3 hours ago
+    const stale = await ctx.db
+      .query("rooms")
+      .filter(q =>
+        q.and(
+          q.neq(q.field("status"), "finished"),
+          q.neq(q.field("status"), "abandoned"),
+          q.lt(q.field("_creationTime"), cutoff),
+        )
+      )
+      .collect();
+
+    for (const room of stale) {
+      await ctx.db.patch(room._id, { status: "abandoned" });
+    }
+
+    return { abandoned: stale.length };
   },
 });

@@ -36,11 +36,11 @@ export const AI_LABEL = {
 };
 
 export const AI_MODELS = [
-  { id: 'auto',   name: 'Auto (Free)',       badge: 'OPENROUTER', desc: 'Qwen 3 Plus — free tier' },
-  { id: 'claude', name: 'Claude Sonnet',     badge: 'ANTHROPIC',  desc: 'Best structured reasoning' },
-  { id: 'gpt4',   name: 'GPT-4o',           badge: 'OPENAI',     desc: 'Strong all-round performance' },
-  { id: 'gemini', name: 'Gemini Flash',      badge: 'GOOGLE',     desc: 'Fast with great context' },
-  { id: 'llama',  name: 'Llama 3.1 70B',    badge: 'META',       desc: 'Open-source powerhouse' },
+  { id: 'auto',   name: 'Auto (Free)',    badge: 'OPENROUTER', desc: 'Qwen 3 Plus — free tier. May have formatting issues on complex modes.' },
+  { id: 'claude', name: 'Claude Sonnet', badge: 'ANTHROPIC',  desc: 'Best structured reasoning. Recommended for Court & Sales Gym.' },
+  { id: 'gpt4',   name: 'GPT-4o',        badge: 'OPENAI',     desc: 'Strong all-round performance. Reliable structured output.' },
+  { id: 'gemini', name: 'Gemini Flash',  badge: 'GOOGLE',     desc: 'Fast with great context window.' },
+  { id: 'llama',  name: 'Llama 3.3 70B', badge: 'META',       desc: 'Open-source powerhouse. Free via OpenRouter.' },
 ];
 
 const MAX_CLAIM_HP = 3;
@@ -74,23 +74,19 @@ export function useGym() {
   const messagesRef = useRef([]);
   messagesRef.current = messages;
 
-  // Convex actions
-  const extractClaimsAction = useAction(api.llm.extractClaims);
-  const argueAction = useAction(api.llm.argue);
-  const getVerdictAction = useAction(api.llm.getVerdict);
-  const updateEloMutation = useMutation(api.users.updateElo);
+  // ── Auth — must be called unconditionally (Rules of Hooks) ──────────────
+  const auth = useAuth();
+
+  // ── Convex actions ───────────────────────────────────────────────────────
+  const extractClaimsAction  = useAction(api.llm.extractClaims);
+  const argueAction          = useAction(api.llm.argue);
+  const getVerdictAction     = useAction(api.llm.getVerdict);
+  const updateEloMutation    = useMutation(api.users.updateElo);
   const updateWeaknessAction = useMutation(api.weaknessProfiles.update);
 
-  // Auth
-  let auth;
-  try {
-    auth = useAuth();
-  } catch (_) {
-    auth = null;
-  }
-
-  const weaknessProfile = useQuery(api.weaknessProfiles.get, 
-    auth?.user?._id ? { userId: auth.user._id } : "skip"
+  const weaknessProfile = useQuery(
+    api.weaknessProfiles.get,
+    auth?.user?._id && !auth.isGuest ? { userId: auth.user._id } : 'skip'
   );
 
   const updateRunningScores = (roundsArr) => {
@@ -101,9 +97,11 @@ export function useGym() {
     setRunningScores({ logic: avg('logic'), evidence: avg('evidence'), originality: avg('originality') });
   };
 
-  // ── Streaming argue call ──
+  // ── Streaming argue — shows error instead of silently swallowing ─────────
   const argueStream = useCallback(async (msgs, currentClaims, currentMode, currentTopic, currentStance, currentDifficulty, currentScenario, currentPersona) => {
     setStreamingText('');
+    let streamError = null;
+
     try {
       const reader = await streamArgue({
         messages: msgs,
@@ -128,27 +126,52 @@ export function useGym() {
           streamedText += event.token;
           setStreamingText(streamedText);
         } else if (event.error) {
-          throw new Error(event.error);
+          streamError = event.error;
+          break;
         }
       }
 
       setStreamingText('');
-      return finalData || { argument: streamedText, scores: { logic: 7, evidence: 6, originality: 7, roundFeedback: '' }, claimHits: [false, false, false], judgeRuling: null };
-    } catch (e) {
+
+      if (streamError) throw new Error(streamError);
+
+      return finalData || {
+        argument: streamedText,
+        scores: { logic: 7, evidence: 6, originality: 7, roundFeedback: '' },
+        claimHits: [false, false, false],
+        judgeRuling: null,
+      };
+    } catch (streamErr) {
       setStreamingText('');
-      // Fallback to non-streaming
-      return await argueAction({
-        messages: msgs,
-        topic: currentTopic || topic,
-        stance: currentStance || stance,
-        difficulty: currentDifficulty || difficulty,
-        claims: currentClaims || claims,
-        mode: currentMode || mode,
-        scenario: currentScenario || scenario,
-        persona: currentPersona || persona,
-        model,
-        weaknessProfile: weaknessProfile || null,
-      });
+      // Surface the actual error message — don't silently swallow it
+      const errMsg = streamErr?.message || 'Streaming failed';
+      const isRateLimit = errMsg.includes('429') || errMsg.toLowerCase().includes('overwhelmed');
+
+      if (isRateLimit) throw new Error('AI is currently overwhelmed. Please wait a moment and try again.');
+
+      // Fallback to non-streaming action
+      try {
+        return await argueAction({
+          messages: msgs,
+          topic: currentTopic || topic,
+          stance: currentStance || stance,
+          difficulty: currentDifficulty || difficulty,
+          claims: currentClaims || claims,
+          mode: currentMode || mode,
+          scenario: currentScenario || scenario,
+          persona: currentPersona || persona,
+          model,
+          weaknessProfile: weaknessProfile || null,
+        });
+      } catch (fallbackErr) {
+        // Now surface the actual error clearly
+        const msg = fallbackErr?.message || errMsg;
+        throw new Error(msg.includes('API_KEY') || msg.includes('401')
+          ? 'API key missing or invalid. Check your Convex environment variables.'
+          : msg.includes('429') ? 'Rate limited. Please wait a moment.'
+          : `AI failed: ${msg}`
+        );
+      }
     }
   }, [topic, stance, difficulty, claims, mode, scenario, persona, model, argueAction, weaknessProfile]);
 
@@ -163,9 +186,8 @@ export function useGym() {
       setVerdict(data);
       setPhase(PHASES.VERDICT);
 
-      // Update ELO
       try {
-        if (auth?.user?._id) {
+        if (auth?.user?._id && !auth.isGuest) {
           const elo = await updateEloMutation({
             userId: auth.user._id,
             verdict: data.verdict,
@@ -178,8 +200,6 @@ export function useGym() {
             transcript: finalMsgs,
           });
           setEloResult(elo);
-
-          // Update weakness profile
           try {
             await updateWeaknessAction({
               userId: auth.user._id,
@@ -193,7 +213,6 @@ export function useGym() {
             });
           } catch (_) {}
         } else {
-          // Local ELO fallback if no user id
           const elo = updateLocalElo(data.verdict, mode);
           setEloResult(elo);
         }
@@ -251,6 +270,7 @@ export function useGym() {
       if (newHp.every(hp => hp === 0)) fetchVerdict(updated);
     } catch (e) {
       setError(e.message || 'AI failed to respond. Try again.');
+      setPhase(PHASES.SPARRING);
     }
     setLoading(false);
   }, [statement, topic, stance, difficulty, claims, mode, scenario, persona, fetchVerdict, argueStream]);
@@ -291,7 +311,7 @@ export function useGym() {
         setPhase(PHASES.SIDE_SWITCH_OFFER);
       }
     } catch (e) {
-      setError('AI failed to respond. Try again.');
+      setError(e.message || 'AI failed to respond. Try again.');
     }
     setLoading(false);
   }, [userInput, loading, messages, currentRound, rounds, claimsHp, topic, stance, difficulty, claims, sideSwitch, mode, scenario, persona, fetchVerdict, argueStream]);
@@ -313,7 +333,7 @@ export function useGym() {
       setMessages([...newMessages, { role: 'assistant', content: data.argument }]);
       setPhase(PHASES.SPARRING);
     } catch (e) {
-      setError('Side switch failed. Try again.');
+      setError(e.message || 'Side switch failed. Try again.');
       setPhase(PHASES.SIDE_SWITCH_OFFER);
     }
     setLoading(false);

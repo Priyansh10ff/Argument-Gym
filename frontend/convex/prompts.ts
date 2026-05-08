@@ -284,3 +284,17 @@ For FINAL_VERDICT respond ONLY with:
   "bestArgument": "The single strongest argument made in the entire debate",
   "mostEgregious": "The weakest argument or biggest logical failure"
 }|||END|||`;
+
+// ─── Shared model map — single source of truth ──────────────────────────────
+// Both http.ts (streaming) and llm.ts (non-streaming) import from here.
+export const MODEL_MAP: Record<string, string> = {
+  auto:   "qwen/qwen3-plus:free",
+  claude: "anthropic/claude-3.5-sonnet",
+  gpt4:   "openai/gpt-4o",
+  gemini: "google/gemini-flash-1.5",
+  llama:  "meta-llama/llama-3.3-70b-instruct:free",
+};
+
+export function resolveModel(modelKey?: string): string {
+  return MODEL_MAP[modelKey ?? "auto"] ?? MODEL_MAP["auto"];
+}

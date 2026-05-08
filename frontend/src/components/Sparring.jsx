@@ -4,11 +4,21 @@ import HealthBar from './HealthBar';
 import { SCORE_LABELS, AI_LABEL } from '../hooks/useGym';
 
 function ScoreBar({ label, value, color }) {
+  const [pulse, setPulse] = React.useState(false);
+  const prevVal = React.useRef(value);
+  React.useEffect(() => {
+    if (prevVal.current !== value) {
+      setPulse(true);
+      const t = setTimeout(() => setPulse(false), 600);
+      prevVal.current = value;
+      return () => clearTimeout(t);
+    }
+  }, [value]);
   return (
     <div className={styles.scoreRow}>
       <span className={styles.scoreLabel}>{label}</span>
       <div className={styles.barBg}>
-        <div className={styles.barFill} style={{ width: `${value}%`, background: color }} />
+        <div className={`${styles.barFill}${pulse ? " " + styles.barFillPulse : ""}`} style={{ width: `${value}%`, background: color }} />
       </div>
       <span className={styles.scoreVal}>{value}</span>
     </div>
@@ -36,11 +46,9 @@ export default function Sparring({
   }, [rounds, loading]);
 
   // Speech Recognition (STT)
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const hasSpeechSupport = !!SpeechRecognition;
-
   const toggleSpeech = () => {
-    if (!hasSpeechSupport) return alert('Speech recognition not supported in this browser');
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) return alert('Speech recognition not supported in this browser');
     
     const recognition = new SpeechRecognition();
     recognition.lang = 'en-US';
@@ -199,15 +207,13 @@ export default function Sparring({
 
         <div className={styles.inputArea}>
           <div className={styles.voiceControls}>
-             {hasSpeechSupport && (
-               <button 
-                 className={`${styles.voiceBtn} ${isListening ? styles.active : ''}`} 
-                 onClick={toggleSpeech}
-                 title="Dictate Argument"
-               >
-                 {isListening ? '🛑' : '🎙️'}
-               </button>
-             )}
+             <button 
+               className={`${styles.voiceBtn} ${isListening ? styles.active : ''}`} 
+               onClick={toggleSpeech}
+               title="Dictate Argument"
+             >
+               {isListening ? '🛑' : '🎙️'}
+             </button>
              <button 
                className={`${styles.voiceBtn} ${ttsEnabled ? styles.active : ''}`} 
                onClick={() => setTtsEnabled(!ttsEnabled)}
