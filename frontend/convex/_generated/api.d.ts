@@ -9,6 +9,9 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as crons from "../crons.js";
+import type * as daily from "../daily.js";
+import type * as debates from "../debates.js";
 import type * as http from "../http.js";
 import type * as llm from "../llm.js";
 import type * as prompts from "../prompts.js";
@@ -24,6 +27,9 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  crons: typeof crons;
+  daily: typeof daily;
+  debates: typeof debates;
   http: typeof http;
   llm: typeof llm;
   prompts: typeof prompts;
