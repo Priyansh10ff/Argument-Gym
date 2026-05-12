@@ -8,5 +8,8 @@
     "dev:convex": "cd frontend && npx convex dev",
     "build": "cd frontend && npm run build",
     "start": "cd frontend && npm run preview"
+  },
+  "dependencies": {
+    "convex": "^1.38.0"
   }
 }
