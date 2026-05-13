@@ -18,7 +18,6 @@ coverage/
 # Convex
 .convex/
 */.convex/
-_generated/
 
 # Logs
 *.log
