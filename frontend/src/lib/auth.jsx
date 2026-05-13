@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { useConvexAuth } from 'convex/react';
 import { useAuthActions } from '@convex-dev/auth/react';
 import { useMutation, useQuery } from 'convex/react';
-import { api } from '../../../convex/_generated/api';
+import { api } from "../../convex/_generated/api"
 const AuthContext = createContext(null);
 
 // ─── Generate/retrieve a persistent guest ID ───────────────────────────────
