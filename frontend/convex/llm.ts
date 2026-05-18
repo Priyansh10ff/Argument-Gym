@@ -75,32 +75,40 @@ export const extractClaims = action({
     weaknessProfile: v.optional(v.any()),
   },
   handler: async (_ctx, args) => {
-    const sys = buildSystemPrompt({
-      mode: args.mode || "standard",
-      persona: args.persona || "skeptical_cfo",
-      scenario: sanitize(args.scenario || ""),
-      weaknessProfile: args.weaknessProfile || null,
-      topic: sanitize(args.topic, 200),
-      stance: args.stance,
-      difficulty: args.difficulty,
-      claims: [],
-    });
+    try {
+      console.log("[extractClaims] Starting with model:", args.model || "auto");
+      const sys = buildSystemPrompt({
+        mode: args.mode || "standard",
+        persona: args.persona || "skeptical_cfo",
+        scenario: sanitize(args.scenario || ""),
+        weaknessProfile: args.weaknessProfile || null,
+        topic: sanitize(args.topic, 200),
+        stance: args.stance,
+        difficulty: args.difficulty,
+        claims: [],
+      });
 
-    const text = await callLLM(
-      sys,
-      [
-        {
-          role: "user",
-          content: `ACTION: EXTRACT_CLAIMS\nTopic: ${sanitize(args.topic, 200)}\nStance: ${args.stance}\nDifficulty: ${args.difficulty}\nStatement: ${sanitize(args.statement)}`,
-        },
-      ],
-      512,
-      args.model
-    );
+      console.log("[extractClaims] Calling LLM...");
+      const text = await callLLM(
+        sys,
+        [
+          {
+            role: "user",
+            content: `ACTION: EXTRACT_CLAIMS\nTopic: ${sanitize(args.topic, 200)}\nStance: ${args.stance}\nDifficulty: ${args.difficulty}\nStatement: ${sanitize(args.statement)}`,
+          },
+        ],
+        512,
+        args.model
+      );
 
-    const match = text.match(/\|\|\|CLAIMS\|\|\|([\s\S]*?)\|\|\|END\|\|\|/);
-    if (!match) throw new ConvexError("Model format error — try a different model. Output was: " + text.slice(0, 200));
-    return JSON.parse(match[1]);
+      console.log("[extractClaims] LLM response length:", text.length, "preview:", text.slice(0, 200));
+      const match = text.match(/\|\|\|CLAIMS\|\|\|([\s\S]*?)\|\|\|END\|\|\|/);
+      if (!match) throw new ConvexError("Model format error — try a different model. Output was: " + text.slice(0, 200));
+      return JSON.parse(match[1]);
+    } catch (error: any) {
+      console.error("[extractClaims] FULL ERROR:", error?.message || error, JSON.stringify(error));
+      throw error;
+    }
   },
 });
 
