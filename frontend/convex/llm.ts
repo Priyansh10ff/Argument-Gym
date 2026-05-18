@@ -1,7 +1,7 @@
 "use node";
 
 import { action } from "./_generated/server";
-import { v } from "convex/values";
+import { v, ConvexError } from "convex/values";
 import { buildSystemPrompt, resolveModel, HVH_MONITOR_PROMPT, SALES_PERSONAS } from "./prompts";
 import OpenAI from "openai";
 
@@ -43,18 +43,22 @@ async function callLLM(
   modelKey?: string
 ): Promise<string> {
   const client = getClient();
-  const res = await client.chat.completions.create({
-    model: getModel(modelKey),
-    max_tokens: maxTokens,
-    messages: [
-      { role: "system" as const, content: systemPrompt },
-      ...messages.map((m) => ({
-        role: m.role as "user" | "assistant",
-        content: m.content,
-      })),
-    ],
-  });
-  return res.choices[0]?.message?.content || "";
+  try {
+    const res = await client.chat.completions.create({
+      model: getModel(modelKey),
+      max_tokens: maxTokens,
+      messages: [
+        { role: "system" as const, content: systemPrompt },
+        ...messages.map((m) => ({
+          role: m.role as "user" | "assistant",
+          content: m.content,
+        })),
+      ],
+    });
+    return res.choices[0]?.message?.content || "";
+  } catch (error: any) {
+    throw new ConvexError(`LLM Error: ${error.message || error}`);
+  }
 }
 
 // ─── Extract Claims ───────────────────────────────────────────────────────────
@@ -95,7 +99,7 @@ export const extractClaims = action({
     );
 
     const match = text.match(/\|\|\|CLAIMS\|\|\|([\s\S]*?)\|\|\|END\|\|\|/);
-    if (!match) throw new Error("Model format error — try a different model");
+    if (!match) throw new ConvexError("Model format error — try a different model. Output was: " + text.slice(0, 200));
     return JSON.parse(match[1]);
   },
 });
