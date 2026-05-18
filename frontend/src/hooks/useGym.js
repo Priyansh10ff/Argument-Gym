@@ -36,7 +36,7 @@ export const AI_LABEL = {
 };
 
 export const AI_MODELS = [
-  { id: 'auto',   name: 'Auto (Free)',    badge: 'OPENROUTER', desc: 'Qwen 3 Plus — free tier. May have formatting issues on complex modes.' },
+  { id: 'auto',   name: 'Auto (Free)',    badge: 'OPENROUTER', desc: 'Qwen 2.5 72B — free tier. May have formatting issues on complex modes.' },
   { id: 'claude', name: 'Claude Sonnet', badge: 'ANTHROPIC',  desc: 'Best structured reasoning. Recommended for Court & Sales Gym.' },
   { id: 'gpt4',   name: 'GPT-4o',        badge: 'OPENAI',     desc: 'Strong all-round performance. Reliable structured output.' },
   { id: 'gemini', name: 'Gemini Flash',  badge: 'GOOGLE',     desc: 'Fast with great context window.' },
