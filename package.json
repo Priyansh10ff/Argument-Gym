@@ -11,5 +11,8 @@
   },
   "dependencies": {
     "convex": "^1.38.0"
+  },
+  "overrides": {
+    "cookie": "^0.7.0"
   }
 }
