@@ -82,18 +82,21 @@ http.route({
             }
           }
 
+          // Strip DeepSeek thinking tags before parsing
+          const cleanText = fullText.replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
+
           // Parse structured data from the full response
-          const scoreMatch = fullText.match(
+          const scoreMatch = cleanText.match(
             /\|\|\|SCORES\|\|\|([\s\S]*?)\|\|\|END\|\|\|/
           );
-          const claimHitsMatch = fullText.match(
+          const claimHitsMatch = cleanText.match(
             /\|\|\|CLAIM_HITS\|\|\|([\s\S]*?)\|\|\|END\|\|\|/
           );
-          const judgeMatch = fullText.match(
+          const judgeMatch = cleanText.match(
             /\|\|\|JUDGE\|\|\|([\s\S]*?)\|\|\|END\|\|\|/
           );
 
-          let argumentText = fullText
+          let argumentText = cleanText
             .replace(/\|\|\|SCORES\|\|\|[\s\S]*?\|\|\|END\|\|\|/g, "")
             .replace(/\|\|\|CLAIM_HITS\|\|\|[\s\S]*?\|\|\|END\|\|\|/g, "")
             .replace(/\|\|\|JUDGE\|\|\|[\s\S]*?\|\|\|END\|\|\|/g, "")

@@ -25,6 +25,11 @@ function getModel(modelKey?: string): string {
   return MODELS[modelKey || "auto"] || MODELS.auto;
 }
 
+// ─── Strip thinking tags (DeepSeek reasoning models) ──────────────────────────
+function stripThinking(text: string): string {
+  return text.replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
+}
+
 // ─── Sanitize ─────────────────────────────────────────────────────────────────
 function sanitize(val: string, maxLen = 3000): string {
   if (typeof val !== "string") return "";
@@ -89,7 +94,7 @@ export const extractClaims = action({
       });
 
       console.log("[extractClaims] Calling LLM...");
-      const text = await callLLM(
+      const raw = await callLLM(
         sys,
         [
           {
@@ -101,9 +106,10 @@ export const extractClaims = action({
         args.model
       );
 
-      console.log("[extractClaims] LLM response length:", text.length, "preview:", text.slice(0, 200));
+      const text = stripThinking(raw);
+      console.log("[extractClaims] LLM response length:", text.length, "preview:", text.slice(0, 300));
       const match = text.match(/\|\|\|CLAIMS\|\|\|([\s\S]*?)\|\|\|END\|\|\|/);
-      if (!match) throw new ConvexError("Model format error — try a different model. Output was: " + text.slice(0, 200));
+      if (!match) throw new ConvexError("Model format error — try a different model. Output was: " + text.slice(0, 300));
       return JSON.parse(match[1]);
     } catch (error: any) {
       console.error("[extractClaims] FULL ERROR:", error?.message || error, JSON.stringify(error));
@@ -138,7 +144,8 @@ export const argue = action({
       claims: args.claims.map((c) => sanitize(c, 300)),
     });
 
-    const text = await callLLM(sys, args.messages, 800, args.model);
+    const raw = await callLLM(sys, args.messages, 800, args.model);
+    const text = stripThinking(raw);
 
     const scoreMatch = text.match(
       /\|\|\|SCORES\|\|\|([\s\S]*?)\|\|\|END\|\|\|/
@@ -216,7 +223,7 @@ export const getVerdict = action({
       claims: args.claims.map((c) => sanitize(c, 300)),
     });
 
-    const text = await callLLM(
+    const raw = await callLLM(
       sys,
       [
         ...args.messages,
@@ -229,10 +236,13 @@ export const getVerdict = action({
       args.model
     );
 
+    const text = stripThinking(raw);
+    console.log("[getVerdict] Response length:", text.length, "preview:", text.slice(0, 300));
+
     const match = text.match(
       /\|\|\|VERDICT\|\|\|([\s\S]*?)\|\|\|END\|\|\|/
     );
-    if (!match) throw new Error("Model format error — try a different model");
+    if (!match) throw new Error("Model format error — try a different model. Output: " + text.slice(0, 300));
     return JSON.parse(match[1]);
   },
 });
@@ -250,13 +260,14 @@ export const monitorHvH = action({
   handler: async (_ctx, args) => {
     const monitor = `TOPIC: ${args.topic}\nP1 (${args.player1Name}, FOR): ${args.p1Text}\nP2 (${args.player2Name}, AGAINST): ${args.p2Text}\nScore this exchange.`;
 
-    const text = await callLLM(
+    const raw = await callLLM(
       HVH_MONITOR_PROMPT,
       [{ role: "user", content: monitor }],
       400,
       args.model
     );
 
+    const text = stripThinking(raw);
     const match = text.match(
       /\|\|\|HVH_SCORES\|\|\|([\s\S]*?)\|\|\|END\|\|\|/
     );
@@ -275,7 +286,7 @@ export const hvhVerdict = action({
     model: v.optional(v.string()),
   },
   handler: async (_ctx, args) => {
-    const text = await callLLM(
+    const raw = await callLLM(
       HVH_MONITOR_PROMPT,
       [
         {
@@ -287,6 +298,7 @@ export const hvhVerdict = action({
       args.model
     );
 
+    const text = stripThinking(raw);
     const match = text.match(
       /\|\|\|HVH_VERDICT\|\|\|([\s\S]*?)\|\|\|END\|\|\|/
     );
