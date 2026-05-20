@@ -288,7 +288,7 @@ For FINAL_VERDICT respond ONLY with:
 // ─── Shared model map — single source of truth ──────────────────────────────
 // Both http.ts (streaming) and llm.ts (non-streaming) import from here.
 export const MODEL_MAP: Record<string, string> = {
-  auto:   "openrouter/auto",
+  auto:   "deepseek/deepseek-v4-flash",
   claude: "anthropic/claude-3.5-sonnet",
   gpt4:   "openai/gpt-4o",
   gemini: "google/gemini-flash-1.5",

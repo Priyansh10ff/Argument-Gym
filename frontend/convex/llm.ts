@@ -7,7 +7,7 @@ import OpenAI from "openai";
 
 // ─── Model routing ────────────────────────────────────────────────────────────
 const MODELS: Record<string, string> = {
-  auto: "openrouter/auto",
+  auto: "deepseek/deepseek-v4-flash",
   claude: "anthropic/claude-sonnet-4",
   gpt4: "openai/gpt-4o",
   gemini: "google/gemini-2.5-flash",
