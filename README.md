@@ -1,6 +1,5 @@
 <div align="center">
   <h1>🥊 Argument Gym</h1>
-  <img src="./Argument-Gym.png" alt="Argument Gym Logo" width="120" />
   <p><strong>Your arguments are weaker than you think.</strong></p>
   <p>An AI-powered sparring arena designed to sharpen your logic, improve your sales objections, and prepare you for high-stakes debates.</p>
 
@@ -16,6 +15,8 @@
   <a href="#-setup">Setup</a> ·
   <a href="#-how-it-works">How It Works</a>
 </div>
+
+![Argument Gym website preview](./Argument-Gym.png)
 
 ---
 
