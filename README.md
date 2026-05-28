@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/Priyansh10ff/Argument-Gym/main/frontend/public/favicon.ico" alt="Argument Gym Logo" width="120" />
+  <img src="./Argument-Gym.png" alt="Argument Gym Logo" width="120" />
   <h1>🥊 Argument Gym</h1>
   <p><strong>Your arguments are weaker than you think.</strong></p>
   <p>An AI-powered sparring arena designed to sharpen your logic, improve your sales objections, and prepare you for high-stakes debates.</p>
