@@ -74,7 +74,11 @@ export default function Sparring({
   }, [rounds, ttsEnabled, streamingText]);
 
   const handleKey = (e) => {
-    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) onSubmit();
+    // Enter alone = submit, Shift+Enter = new line
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (!loading && userInput.trim()) onSubmit();
+    }
   };
 
   const lastRound = rounds[rounds.length - 1];
@@ -231,7 +235,7 @@ export default function Sparring({
             <textarea
               ref={inputRef}
               className={styles.textarea}
-              placeholder="Defend your position... (Ctrl+Enter to submit)"
+              placeholder="Defend your position... (Enter to submit, Shift+Enter for new line)"
               value={userInput}
               onChange={e => setUserInput(e.target.value)}
               onKeyDown={handleKey}
