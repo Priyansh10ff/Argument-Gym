@@ -199,6 +199,7 @@ export default function App() {
               />
             );
           case PHASES.SIDE_SWITCH_OFFER:
+            if (gym.mode === 'courtroom') { gym.declineSideSwitch(); return null; }
             return (
               <SideSwitchOffer
                 topic={gym.topic} stance={gym.stance}

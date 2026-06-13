@@ -307,7 +307,7 @@ export function useGym() {
         await fetchVerdict(updated);
       } else if (nextRound >= MAX_ROUNDS) {
         await fetchVerdict(updated);
-      } else if (nextRound >= 3 && !sideSwitch) {
+      } else if (nextRound >= 3 && !sideSwitch && mode !== 'courtroom') {
         setPhase(PHASES.SIDE_SWITCH_OFFER);
       }
     } catch (e) {
