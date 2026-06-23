@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import { useGym, PHASES } from './hooks/useGym';
 import MarketingPage  from './components/MarketingPage';
 import Landing        from './components/Landing';
@@ -60,7 +61,12 @@ export default function App() {
 
   // ── Marketing ──────────────────────────────────────────────────────────────
   if (showMarketing && gym.phase === PHASES.LANDING && !hvhMode && !lobbyMode && !profileMode && !spectating && !replayId) {
-    return <MarketingPage onEnter={() => setShowMarketing(false)} />;
+    return (
+      <>
+        <MarketingPage onEnter={() => setShowMarketing(false)} />
+        <Analytics />
+      </>
+    );
   }
 
   // ── Shared nav props ───────────────────────────────────────────────────────
@@ -76,6 +82,7 @@ export default function App() {
       <>
         <NavBar {...navProps} />
         <Replay debateId={replayId} onBack={() => setReplayId(null)} />
+        <Analytics />
       </>
     );
   }
@@ -90,6 +97,7 @@ export default function App() {
           onJoinRoom={(data) => { setLobbyMode(false); setHvhMode('room'); setHvhData(data); }}
           onSpectate={(data) => { setLobbyMode(false); setSpectating(data); }}
         />
+        <Analytics />
       </>
     );
   }
@@ -100,6 +108,7 @@ export default function App() {
       <>
         <NavBar {...navProps} />
         <SpectatorView roomId={spectating.roomId} onBack={() => setSpectating(null)} />
+        <Analytics />
       </>
     );
   }
@@ -113,6 +122,7 @@ export default function App() {
           onEnterRoom={(data) => { setHvhData(data); setHvhMode('room'); }}
           onBack={() => setHvhMode(null)}
         />
+        <Analytics />
       </>
     );
   }
@@ -129,6 +139,7 @@ export default function App() {
           name={hvhData.name}
           onBack={() => { setHvhMode(null); setHvhData(null); }}
         />
+        <Analytics />
       </>
     );
   }
@@ -139,6 +150,7 @@ export default function App() {
       <>
         <NavBar {...navProps} active="profile" />
         <Profile onBack={() => setProfileMode(false)} />
+        <Analytics />
       </>
     );
   }
@@ -220,6 +232,7 @@ export default function App() {
             return <Landing onStart={handleStart} />;
         }
       })()}
+      <Analytics />
     </>
   );
 }
